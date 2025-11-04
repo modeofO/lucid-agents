@@ -67,12 +67,8 @@ async function buildPackages() {
 
   // Align build order with scripts/build-all.ts so internal deps build first.
   const preferredOrder = [
-    "@lucid-dreams/client",
     "@lucid-dreams/agent-kit-identity",
-    "@lucid-dreams/sdk",
-    "@lucid-dreams/agent-auth",
     "@lucid-dreams/agent-kit",
-    "@lucid-dreams/agent-runtime-cli",
     "@lucid-dreams/create-agent-kit",
   ];
 

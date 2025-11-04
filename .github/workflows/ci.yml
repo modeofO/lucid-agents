@@ -38,22 +38,6 @@ jobs:
 
       - name: Typecheck packages
         run: |
-          bun x tsc -p packages/api/tsconfig.json --noEmit
           bun x tsc -p packages/agent-kit/tsconfig.json --noEmit
-
-      - name: Typecheck server
-        working-directory: apps/server
-        run: bun run check
-
-      - name: Run server tests
-        working-directory: apps/server
-        env:
-          CI: "true"
-        run: bun run test
-
-      - name: Build client
-        working-directory: apps/client
-        env:
-          CI: "true"
-        run: bun run build
-
+          bun x tsc -p packages/agent-kit-identity/tsconfig.json --noEmit
+          bun x tsc -p packages/create-agent-kit/tsconfig.json --noEmit
