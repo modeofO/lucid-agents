@@ -14,13 +14,13 @@
       },
     },
     "packages/agent-kit": {
-      "name": "@lucid-dreams/agent-kit",
-      "version": "0.2.24",
+      "name": "@lucid-agents/agent-kit",
+      "version": "0.2.25",
       "dependencies": {
         "@ax-llm/ax": "^14.0.37",
         "@ax-llm/ax-tools": "^14.0.37",
+        "@lucid-agents/agent-kit-identity": "workspace:*",
         "@lucid-dreams/agent-auth": "latest",
-        "@lucid-dreams/agent-kit-identity": "workspace:*",
         "@lucid-dreams/client": "latest",
         "hono": "catalog:",
         "viem": "^2.38.5",
@@ -35,27 +35,27 @@
       },
     },
     "packages/agent-kit-identity": {
-      "name": "@lucid-dreams/agent-kit-identity",
-      "version": "0.2.24",
+      "name": "@lucid-agents/agent-kit-identity",
+      "version": "0.2.25",
       "dependencies": {
         "viem": "^2.38.1",
       },
       "devDependencies": {
-        "tsup": "catalog:",
-        "typescript": "catalog:",
+        "tsup": "^8.5.0",
+        "typescript": "^5.9.2",
       },
     },
     "packages/create-agent-kit": {
-      "name": "@lucid-dreams/create-agent-kit",
-      "version": "0.2.24",
+      "name": "@lucid-agents/create-agent-kit",
+      "version": "0.2.25",
       "bin": {
         "create-agent-kit": "dist/index.js",
       },
       "devDependencies": {
         "@types/node": "^24.3.1",
         "bun-types": "^1.1.16",
-        "tsup": "catalog:",
-        "typescript": "catalog:",
+        "tsup": "^8.5.0",
+        "typescript": "^5.9.2",
       },
     },
   },
@@ -200,15 +200,15 @@
 
     "@lit/reactive-element": ["@lit/reactive-element@2.1.1", "", { "dependencies": { "@lit-labs/ssr-dom-shim": "^1.4.0" } }, "sha512-N+dm5PAYdQ8e6UlywyyrgI2t++wFGXfHx+dSJ1oBrg6FAxUj40jId++EaRm80MKX5JnlH1sBsyZ5h0bcZKemCg=="],
 
+    "@lucid-agents/agent-kit": ["@lucid-agents/agent-kit@workspace:packages/agent-kit"],
+
+    "@lucid-agents/agent-kit-identity": ["@lucid-agents/agent-kit-identity@workspace:packages/agent-kit-identity"],
+
+    "@lucid-agents/create-agent-kit": ["@lucid-agents/create-agent-kit@workspace:packages/create-agent-kit"],
+
     "@lucid-dreams/agent-auth": ["@lucid-dreams/agent-auth@0.2.24", "", { "dependencies": { "@lucid-dreams/sdk": "^0.2.24", "viem": "^2.38.5" } }, "sha512-QiJQ2FTJXtd1o6c1fkEq/qawBJbhZdmGukwt+B8LztTmjjkdhfRZvWbNk3DUBIZIPsbInWdwbgPAUkzGMUNyDg=="],
 
-    "@lucid-dreams/agent-kit": ["@lucid-dreams/agent-kit@workspace:packages/agent-kit"],
-
-    "@lucid-dreams/agent-kit-identity": ["@lucid-dreams/agent-kit-identity@workspace:packages/agent-kit-identity"],
-
     "@lucid-dreams/client": ["@lucid-dreams/client@0.2.24", "", { "dependencies": { "x402-fetch": "^0.7.0", "zod": "^4.1.12" } }, "sha512-wg7FUKcEqha9xJFjrs5JvbgVDgtRXW5sEV6Y+05RWQS0WHzOYb50Sxr+LyxFfMgdTjGeYb8uYCBMdFR0rc1hqA=="],
-
-    "@lucid-dreams/create-agent-kit": ["@lucid-dreams/create-agent-kit@workspace:packages/create-agent-kit"],
 
     "@lucid-dreams/sdk": ["@lucid-dreams/sdk@0.2.24", "", { "dependencies": { "@lucid-dreams/client": "^0.2.24", "x402-fetch": "^0.7.0", "zod": "^4.1.12" }, "peerDependencies": { "@tanstack/react-query": "^5.90.5" } }, "sha512-U0cq+Mdj/4WBhjwyLygz1sWS+5nL5UrB9/waKxd3Zlu1NLosXWeYGQUFo5j/3dsS1/pbLDUjqGutgcrvGTVSyg=="],
 

@@ -1,6 +1,6 @@
 # Lucid Dreams Agent Platform
 
-Build, ship, and monetize AI agents with a consistent surface across runtimes. This monorepo hosts the primitives we use to describe agent capabilities once and deliver them through web servers, manifests, and on-chain identity.
+Build, ship, and monetize AI agents with a consistent surface across runtimes. This monorepo hosts the primitives we use to describe agent capabilities once and deliver them through web servers, manifests, and onchain identity.
 
 ## Overview
 
@@ -31,4 +31,3 @@ Each package README contains API details, environment variables, and complete ex
 ## Resources
 
 - ERC-8004 specification: <https://eips.ethereum.org/EIPS/eip-8004>
-- Lucid Dreams org: <https://github.com/lucid-dreams-ai>
