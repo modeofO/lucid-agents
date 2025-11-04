@@ -10,8 +10,8 @@ Build, ship, and monetize AI agents with a consistent surface across runtimes. T
 
 ## Key Packages
 
-- [`@lucid-dreams/agent-kit`](packages/agent-kit/README.md) — Hono wrapper that registers entrypoints, serves manifests, manages payments, and exposes trust metadata utilities.
-- [`@lucid-dreams/agent-kit-identity`](packages/agent-kit-identity/README.md) — ERC-8004 toolkit for registering agents, generating trust configs, and working with reputation/validation registries.
+- [`@lucid-agents/agent-kit`](packages/agent-kit/README.md) — Hono wrapper that registers entrypoints, serves manifests, manages payments, and exposes trust metadata utilities.
+- [`@lucid-agents/agent-kit-identity`](packages/agent-kit-identity/README.md) — ERC-8004 toolkit for registering agents, generating trust configs, and working with reputation/validation registries.
 
 Each package README contains API details, environment variables, and complete examples.
 
@@ -25,11 +25,11 @@ Each package README contains API details, environment variables, and complete ex
 
 ```ts
 import { z } from "zod";
-import { createAgentApp } from "@lucid-dreams/agent-kit";
+import { createAgentApp } from "@lucid-agents/agent-kit";
 import {
   createAgentIdentity,
   getTrustConfig,
-} from "@lucid-dreams/agent-kit-identity";
+} from "@lucid-agents/agent-kit-identity";
 
 const identity = await createAgentIdentity({
   domain: "my-agent.example.com",
