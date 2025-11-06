@@ -117,9 +117,6 @@ describe("create-agent-kit CLI", () => {
     expect(agentSrc).toContain('key: "echo"');
     expect(agentSrc).toContain('// price: "1000",');
     expect(agentSrc).not.toContain("{{APP_NAME}}");
-    expect(envExample).toContain("NETWORK=base-sepolia");
-    expect(envExample).not.toContain("{{");
-    expect(envExample).toContain("PRIVATE_KEY=");
   });
 
   it("applies onboarding answers to the scaffolded template", async () => {
@@ -162,14 +159,13 @@ describe("create-agent-kit CLI", () => {
     expect(agentSrc).toContain('price: "4500",');
     expect(agentSrc).toContain('facilitatorUrl: "https://facilitator.example"');
     expect(agentSrc).toContain('defaultPrice: "4200",');
+    expect(agentSrc).toContain('network: "base"');
+    expect(agentSrc).toContain(
+      'payTo: "0xabc0000000000000000000000000000000000000"'
+    );
     expect(readme).toContain("quote-price");
     expect(readme).toContain("(price: 4500 base units)");
-    expect(envExample).toContain("NETWORK=base");
-    expect(envExample).toContain("FACILITATOR_URL=https://facilitator.example");
-    expect(envExample).toContain(
-      "PAY_TO=0xabc0000000000000000000000000000000000000"
-    );
-    expect(envExample).toContain("DEFAULT_PRICE=4200");
+    // .env.example should keep safe placeholder values (not user's real values)
     expect(envExample).toContain("PRIVATE_KEY=");
   });
 
@@ -260,15 +256,15 @@ describe("create-agent-kit CLI", () => {
       ["API_BASE_URL", "http://localhost:9999"],
       ["RPC_URL", "https://example"],
       ["REGISTER_IDENTITY", "true"],
-      ["NETWORK", "base"],
-      ["FACILITATOR_URL", "https://facilitator"],
-      ["PAY_TO", "0x1234"],
-      ["DEFAULT_PRICE", "5000"],
+      ["PRIVATE_KEY", "0xtest123"],
     ]);
 
     const prompt: PromptApi = {
       select: async ({ choices }) => choices[0]?.value ?? "",
-      confirm: async () => true,
+      confirm: async ({ message }) => {
+        if (message.includes(".env")) return true;
+        return false;
+      },
       input: async ({ message, defaultValue = "" }) =>
         responses.get(message) ?? defaultValue,
     };
@@ -279,7 +275,8 @@ describe("create-agent-kit CLI", () => {
     const env = await readFile(join(projectDir, ".env"), "utf8");
     expect(env).toContain("PORT=3333");
     expect(env).toContain("API_BASE_URL=http://localhost:9999");
-    expect(env).toContain("DEFAULT_PRICE=5000");
+    expect(env).toContain("RPC_URL=https://example");
+    expect(env).toContain("PRIVATE_KEY=0xtest123");
   });
 
   it("requires --template when multiple templates and no prompt", async () => {

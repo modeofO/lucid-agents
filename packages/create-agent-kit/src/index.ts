@@ -209,6 +209,7 @@ export async function runCli(
     envMode: parsed.options.envMode,
     prompt,
     logger,
+    onboardingAnswers: replacements,
   });
 
   if (parsed.options.install) {
@@ -891,10 +892,6 @@ async function applyTemplateTransforms(
     join(targetDir, "src/agent.ts"),
     replacements
   );
-  await replaceTemplatePlaceholders(
-    join(targetDir, ".env.example"),
-    replacements
-  );
 
   await removeTemplateArtifacts(targetDir);
 }
@@ -942,8 +939,9 @@ async function setupEnvironment(params: {
   envMode: CliOptions["envMode"];
   prompt?: PromptApi;
   logger: RunLogger;
+  onboardingAnswers?: Record<string, string>;
 }) {
-  const { targetDir, envMode, prompt, logger } = params;
+  const { targetDir, envMode, prompt, logger, onboardingAnswers = {} } = params;
   const examplePath = join(targetDir, ".env.example");
   const envPath = join(targetDir, ".env");
 
@@ -982,13 +980,31 @@ async function setupEnvironment(params: {
   const entries = parseEnvTemplate(templateContent);
   const answers = new Map<string, string>();
 
+  // Map onboarding answer keys to env variable names
+  const envKeyMapping: Record<string, string> = {
+    FACILITATOR_URL: "PAYMENTS_FACILITATOR_URL",
+    ADDRESS: "PAYMENTS_PAY_TO",
+    NETWORK: "PAYMENTS_NETWORK",
+    DEFAULT_PRICE: "PAYMENTS_DEFAULT_PRICE",
+  };
+
   for (const entry of entries) {
     if (entry.type !== "entry") continue;
-    const response = await prompt.input({
-      message: `${entry.key}`,
-      defaultValue: entry.value ?? "",
-    });
-    answers.set(entry.key, response);
+    // Check if we already have this value from onboarding
+    const onboardingKey = envKeyMapping[entry.key] ?? entry.key;
+    const defaultFromOnboarding = onboardingAnswers[onboardingKey];
+    
+    if (defaultFromOnboarding) {
+      // Already collected during onboarding - use it directly without prompting
+      answers.set(entry.key, defaultFromOnboarding);
+    } else {
+      // Not in onboarding - prompt user for this value
+      const response = await prompt.input({
+        message: `${entry.key}`,
+        defaultValue: entry.value ?? "",
+      });
+      answers.set(entry.key, response);
+    }
   }
 
   const rendered = renderEnvTemplate(entries, answers);

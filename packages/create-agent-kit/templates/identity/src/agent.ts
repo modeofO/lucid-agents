@@ -19,9 +19,7 @@ if (identity.didRegister) {
 // Extract trust config for the agent manifest
 const trustConfig = getTrustConfig(identity);
 
-// Configure agent with payments and trust metadata
-const agentOptions = {{AGENT_OPTIONS}};
-
+// Configure agent with trust metadata
 const { app, addEntrypoint } = createAgentApp(
   {
     name: "{{APP_NAME}}",
@@ -29,7 +27,6 @@ const { app, addEntrypoint } = createAgentApp(
     description: "{{AGENT_DESCRIPTION}}",
   },
   {
-    ...agentOptions,
     trust: trustConfig,
   }
 );
@@ -40,7 +37,7 @@ addEntrypoint({
   input: z.object({
     text: z.string().min(1, "Please provide some text."),
   }),
-{{ENTRYPOINT_PRICE_LINE}}
+  // Price is read from DEFAULT_PRICE environment variable
   handler: async ({ input }) => {
     return {
       output: {
