@@ -1,5 +1,13 @@
 # @lucid-agents/agent-kit
 
+## 1.1.1
+
+### Patch Changes
+
+- patch
+- Updated dependencies
+  - @lucid-agents/agent-kit-identity@1.1.1
+
 ## 1.1.0
 
 ### Minor Changes
