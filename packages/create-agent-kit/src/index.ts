@@ -119,12 +119,15 @@ const LUCID_BANNER = [
 const DEFAULT_TEMPLATE_VALUES = {
   AGENT_VERSION: "0.1.0",
   AGENT_DESCRIPTION: "Starter agent generated with create-agent-kit",
+  AGENT_DOMAIN: "agent.example.com",
   ENTRYPOINT_KEY: "echo",
   ENTRYPOINT_DESCRIPTION: "Returns text that you send to the agent.",
   PAYMENTS_FACILITATOR_URL: "https://facilitator.daydreams.systems",
   PAYMENTS_PAY_TO: "0xb308ed39d67D0d4BAe5BC2FAEF60c66BBb6AE429",
   PAYMENTS_NETWORK: "base-sepolia",
   PAYMENTS_DEFAULT_PRICE: "1000",
+  RPC_URL: "https://sepolia.base.org",
+  CHAIN_ID: "84532",
 };
 
 const DEFAULT_PROJECT_NAME = "agent-app";
@@ -208,6 +211,7 @@ export async function runCli(
     envMode: parsed.options.envMode,
     prompt,
     logger,
+    onboardingAnswers: replacements,
   });
 
   if (parsed.options.install) {
@@ -308,7 +312,7 @@ async function loadTemplates(
     const metaPath = join(path, "template.json");
     let title = toTitleCase(id);
     let description: string | undefined;
-     let onboarding: OnboardingConfig | undefined;
+    let onboarding: OnboardingConfig | undefined;
 
     try {
       const raw = await fs.readFile(metaPath, "utf8");
@@ -474,10 +478,7 @@ function buildDefaultProjectName(params: {
     candidate = DEFAULT_PROJECT_NAME;
   }
 
-  if (
-    candidate !== DEFAULT_PROJECT_NAME &&
-    !candidate.endsWith("-agent")
-  ) {
+  if (candidate !== DEFAULT_PROJECT_NAME && !candidate.endsWith("-agent")) {
     candidate = `${candidate}-agent`;
   }
 
@@ -598,9 +599,7 @@ async function askOnboardingPrompt(params: {
       typeof defaultValue === "boolean"
         ? defaultValue
         : typeof defaultValue === "string"
-        ? ["true", "yes", "y", "1"].includes(
-            defaultValue.trim().toLowerCase()
-          )
+        ? ["true", "yes", "y", "1"].includes(defaultValue.trim().toLowerCase())
         : false;
 
     return promptApi.confirm({
@@ -704,6 +703,11 @@ function buildTemplateReplacements(params: {
     "AGENT_VERSION",
     DEFAULT_TEMPLATE_VALUES.AGENT_VERSION
   );
+  const agentDomain = getStringAnswer(
+    answers,
+    "AGENT_DOMAIN",
+    DEFAULT_TEMPLATE_VALUES.AGENT_DOMAIN
+  );
   const entrypointKey = toEntrypointKey(
     getStringAnswer(
       answers,
@@ -768,11 +772,24 @@ function buildTemplateReplacements(params: {
     ? ` (price: ${entrypointPrice} base units)`
     : "";
 
+  const autoRegister = getBooleanAnswer(answers, "AUTO_REGISTER", true);
+  const rpcUrl = getStringAnswer(
+    answers,
+    "RPC_URL",
+    DEFAULT_TEMPLATE_VALUES.RPC_URL
+  );
+  const chainId = getStringAnswer(
+    answers,
+    "CHAIN_ID",
+    DEFAULT_TEMPLATE_VALUES.CHAIN_ID
+  );
+
   return {
     APP_NAME: projectDirName,
     PACKAGE_NAME: packageName,
     AGENT_DESCRIPTION: agentDescription,
     AGENT_VERSION: agentVersion,
+    AGENT_DOMAIN: agentDomain,
     ENTRYPOINT_KEY: entrypointKey,
     ENTRYPOINT_DESCRIPTION: entrypointDescription,
     ENTRYPOINT_PRICE: entrypointPrice,
@@ -783,6 +800,9 @@ function buildTemplateReplacements(params: {
     PAYMENTS_NETWORK: paymentsNetwork,
     PAYMENTS_PAY_TO: paymentsPayTo,
     PAYMENTS_DEFAULT_PRICE: paymentsDefaultPrice,
+    RPC_URL: rpcUrl,
+    CHAIN_ID: chainId,
+    AUTO_REGISTER: String(autoRegister),
   };
 }
 
@@ -886,10 +906,6 @@ async function applyTemplateTransforms(
     join(targetDir, "src/agent.ts"),
     replacements
   );
-  await replaceTemplatePlaceholders(
-    join(targetDir, ".env.example"),
-    replacements
-  );
 
   await removeTemplateArtifacts(targetDir);
 }
@@ -937,8 +953,9 @@ async function setupEnvironment(params: {
   envMode: CliOptions["envMode"];
   prompt?: PromptApi;
   logger: RunLogger;
+  onboardingAnswers?: Record<string, string>;
 }) {
-  const { targetDir, envMode, prompt, logger } = params;
+  const { targetDir, envMode, prompt, logger, onboardingAnswers = {} } = params;
   const examplePath = join(targetDir, ".env.example");
   const envPath = join(targetDir, ".env");
 
@@ -958,37 +975,44 @@ async function setupEnvironment(params: {
     return;
   }
 
+  const envKeyMapping: Record<string, string> = {
+    FACILITATOR_URL: "PAYMENTS_FACILITATOR_URL",
+    ADDRESS: "PAYMENTS_PAY_TO",
+    NETWORK: "PAYMENTS_NETWORK",
+    DEFAULT_PRICE: "PAYMENTS_DEFAULT_PRICE",
+  };
+
   if (!prompt) {
     logger.log("Skipping env setup (non-interactive).");
     return;
   }
 
   const shouldCreate = await prompt.confirm({
-    message: "Create a .env file now?",
+    message: "Create .env file? (You'll need to add PRIVATE_KEY manually)",
     defaultValue: true,
   });
 
   if (!shouldCreate) {
-    logger.log("Skipping env setup.");
+    logger.log("Skipping env setup. Copy .env.example to .env when ready.");
     return;
   }
 
+  // Generate .env from onboarding answers
   const templateContent = await fs.readFile(examplePath, "utf8");
   const entries = parseEnvTemplate(templateContent);
   const answers = new Map<string, string>();
 
   for (const entry of entries) {
     if (entry.type !== "entry") continue;
-    const response = await prompt.input({
-      message: `${entry.key}`,
-      defaultValue: entry.value ?? "",
-    });
-    answers.set(entry.key, response);
+    // Use value from onboarding if available
+    const onboardingKey = envKeyMapping[entry.key] ?? entry.key;
+    const value = onboardingAnswers[onboardingKey] ?? entry.value ?? "";
+    answers.set(entry.key, value);
   }
 
   const rendered = renderEnvTemplate(entries, answers);
   await fs.writeFile(envPath, rendered, "utf8");
-  logger.log("Created .env with your values.");
+  logger.log("Created .env from your setup. Remember to add PRIVATE_KEY!");
 }
 
 type EnvTemplateEntry =
