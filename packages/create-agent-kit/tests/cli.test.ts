@@ -247,36 +247,36 @@ describe("create-agent-kit CLI", () => {
     expect(env).toBe(envExample);
   });
 
-  it("prompts for env values when available", async () => {
+  it("generates .env from onboarding answers", async () => {
     const cwd = await createTempDir();
     const templateRoot = await createTemplateRoot(["blank"]);
     const { logger } = createLogger();
-    const responses = new Map<string, string>([
-      ["PORT", "3333"],
-      ["API_BASE_URL", "http://localhost:9999"],
-      ["RPC_URL", "https://example"],
-      ["REGISTER_IDENTITY", "true"],
-      ["PRIVATE_KEY", "0xtest123"],
-    ]);
 
     const prompt: PromptApi = {
       select: async ({ choices }) => choices[0]?.value ?? "",
       confirm: async ({ message }) => {
+        // Enable payments and confirm .env creation
+        if (message.includes("payments")) return true;
         if (message.includes(".env")) return true;
         return false;
       },
-      input: async ({ message, defaultValue = "" }) =>
-        responses.get(message) ?? defaultValue,
+      input: async ({ message, defaultValue = "" }) => {
+        // Just use defaults for all inputs
+        return defaultValue;
+      },
     };
 
     await runCli(["env-agent"], { cwd, logger, prompt, templateRoot });
 
     const projectDir = join(cwd, "env-agent");
     const env = await readFile(join(projectDir, ".env"), "utf8");
-    expect(env).toContain("PORT=3333");
-    expect(env).toContain("API_BASE_URL=http://localhost:9999");
-    expect(env).toContain("RPC_URL=https://example");
-    expect(env).toContain("PRIVATE_KEY=0xtest123");
+
+    // Should have values from onboarding (defaults in this case)
+    expect(env).toContain("NETWORK=base-sepolia");
+    expect(env).toContain(
+      "FACILITATOR_URL=https://facilitator.daydreams.systems"
+    );
+    expect(env).toContain("PRIVATE_KEY="); // Empty - user adds manually
   });
 
   it("requires --template when multiple templates and no prompt", async () => {

@@ -126,6 +126,8 @@ const DEFAULT_TEMPLATE_VALUES = {
   PAYMENTS_PAY_TO: "0xb308ed39d67D0d4BAe5BC2FAEF60c66BBb6AE429",
   PAYMENTS_NETWORK: "base-sepolia",
   PAYMENTS_DEFAULT_PRICE: "1000",
+  RPC_URL: "https://sepolia.base.org",
+  CHAIN_ID: "84532",
 };
 
 const DEFAULT_PROJECT_NAME = "agent-app";
@@ -771,6 +773,16 @@ function buildTemplateReplacements(params: {
     : "";
 
   const autoRegister = getBooleanAnswer(answers, "AUTO_REGISTER", true);
+  const rpcUrl = getStringAnswer(
+    answers,
+    "RPC_URL",
+    DEFAULT_TEMPLATE_VALUES.RPC_URL
+  );
+  const chainId = getStringAnswer(
+    answers,
+    "CHAIN_ID",
+    DEFAULT_TEMPLATE_VALUES.CHAIN_ID
+  );
 
   return {
     APP_NAME: projectDirName,
@@ -788,6 +800,8 @@ function buildTemplateReplacements(params: {
     PAYMENTS_NETWORK: paymentsNetwork,
     PAYMENTS_PAY_TO: paymentsPayTo,
     PAYMENTS_DEFAULT_PRICE: paymentsDefaultPrice,
+    RPC_URL: rpcUrl,
+    CHAIN_ID: chainId,
     AUTO_REGISTER: String(autoRegister),
   };
 }
@@ -961,26 +975,6 @@ async function setupEnvironment(params: {
     return;
   }
 
-  if (!prompt) {
-    logger.log("Skipping env setup (non-interactive).");
-    return;
-  }
-
-  const shouldCreate = await prompt.confirm({
-    message: "Create a .env file now?",
-    defaultValue: true,
-  });
-
-  if (!shouldCreate) {
-    logger.log("Skipping env setup.");
-    return;
-  }
-
-  const templateContent = await fs.readFile(examplePath, "utf8");
-  const entries = parseEnvTemplate(templateContent);
-  const answers = new Map<string, string>();
-
-  // Map onboarding answer keys to env variable names
   const envKeyMapping: Record<string, string> = {
     FACILITATOR_URL: "PAYMENTS_FACILITATOR_URL",
     ADDRESS: "PAYMENTS_PAY_TO",
@@ -988,28 +982,37 @@ async function setupEnvironment(params: {
     DEFAULT_PRICE: "PAYMENTS_DEFAULT_PRICE",
   };
 
+  if (!prompt) {
+    logger.log("Skipping env setup (non-interactive).");
+    return;
+  }
+
+  const shouldCreate = await prompt.confirm({
+    message: "Create .env file? (You'll need to add PRIVATE_KEY manually)",
+    defaultValue: true,
+  });
+
+  if (!shouldCreate) {
+    logger.log("Skipping env setup. Copy .env.example to .env when ready.");
+    return;
+  }
+
+  // Generate .env from onboarding answers
+  const templateContent = await fs.readFile(examplePath, "utf8");
+  const entries = parseEnvTemplate(templateContent);
+  const answers = new Map<string, string>();
+
   for (const entry of entries) {
     if (entry.type !== "entry") continue;
-    // Check if we already have this value from onboarding
+    // Use value from onboarding if available
     const onboardingKey = envKeyMapping[entry.key] ?? entry.key;
-    const defaultFromOnboarding = onboardingAnswers[onboardingKey];
-
-    if (defaultFromOnboarding) {
-      // Already collected during onboarding - use it directly without prompting
-      answers.set(entry.key, defaultFromOnboarding);
-    } else {
-      // Not in onboarding - prompt user for this value
-      const response = await prompt.input({
-        message: `${entry.key}`,
-        defaultValue: entry.value ?? "",
-      });
-      answers.set(entry.key, response);
-    }
+    const value = onboardingAnswers[onboardingKey] ?? entry.value ?? "";
+    answers.set(entry.key, value);
   }
 
   const rendered = renderEnvTemplate(entries, answers);
   await fs.writeFile(envPath, rendered, "utf8");
-  logger.log("Created .env with your values.");
+  logger.log("Created .env from your setup. Remember to add PRIVATE_KEY!");
 }
 
 type EnvTemplateEntry =

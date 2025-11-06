@@ -76,6 +76,18 @@
         "when": { "key": "ENABLE_PAYMENTS", "equals": true }
       },
       {
+        "key": "RPC_URL",
+        "type": "input",
+        "message": "RPC URL (blockchain endpoint)",
+        "defaultValue": "https://sepolia.base.org"
+      },
+      {
+        "key": "CHAIN_ID",
+        "type": "input",
+        "message": "Chain ID",
+        "defaultValue": "84532"
+      },
+      {
         "key": "AUTO_REGISTER",
         "type": "confirm",
         "message": "Auto-register on ERC-8004 registry if not found?",
