@@ -1,6 +1,6 @@
 ## {{APP_NAME}}
 
-This project was scaffolded with `create-agent-kit` and ships with a ready-to-run agent app built on [`@lucid-dreams/agent-kit`](https://www.npmjs.com/package/@lucid-dreams/agent-kit).
+This project was scaffolded with `create-agent-kit` and ships with a ready-to-run agent app built on [`@lucid-agents/agent-kit`](https://www.npmjs.com/package/@lucid-agents/agent-kit).
 
 ### Quick start
 
@@ -30,6 +30,6 @@ The dev command runs `bun` in watch mode, starts the HTTP server, and reloads wh
 ### Next steps
 
 - Update `src/agent.ts` with your use case.
-- Wire up `@lucid-dreams/agent-kit` configuration and secrets (see `AGENTS.md` in the repo for details).
+- Wire up `@lucid-agents/agent-kit` configuration and secrets (see `AGENTS.md` in the repo for details).
 - Copy `.env.example` to `.env` and fill in the values for your environment.
 - Deploy with your preferred Bun-compatible platform when you're ready.

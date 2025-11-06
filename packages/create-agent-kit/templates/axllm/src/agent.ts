@@ -3,7 +3,7 @@ import {
   AgentKitConfig,
   createAgentApp,
   createAxLLMClient,
-} from "@lucid-dreams/agent-kit";
+} from "@lucid-agents/agent-kit";
 
 const axClient = createAxLLMClient({
   logger: {
@@ -41,7 +41,7 @@ const { app, addEntrypoint } = createAgentApp(
     name: "framework-stream-agent",
     version: "0.0.3",
     description:
-      "Minimal example showing how to bridge an Ax LLM streaming integration into @lucid-dreams/agent-kit.",
+      "Minimal example showing how to bridge an Ax LLM streaming integration into @lucid-agents/agent-kit.",
   },
   {
     config: configOverrides,

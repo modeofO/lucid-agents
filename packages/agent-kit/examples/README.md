@@ -35,7 +35,7 @@ This script contains a minimal, end-to-end showcase of everything
 - Enabling x402 monetisation and surfacing the AP2 capability extension.
 - Registering on the ERC-8004 Identity Registry, signing domain ownership proofs, and wiring the resulting trust metadata into the manifest.
 - Fetching the generated AgentCard to verify that trust, payments, and schema metadata are emitted correctly.
-- Ready to pair with `@lucid-dreams/agent-auth` when you need authenticated wallet flows.
+- Ready to pair with `@lucid-agents/agent-auth` when you need authenticated wallet flows.
 
 > The example is intentionally self-contained and uses viem-style clients. Install the peer tooling you need (e.g. `viem`) before running it locally.
 

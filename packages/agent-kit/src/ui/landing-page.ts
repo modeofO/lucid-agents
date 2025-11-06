@@ -165,7 +165,7 @@ export const renderLandingPage = ({
   manifestPath,
   faviconDataUrl,
   x402ClientExample,
-}: LandingPageOptions): HtmlEscapedString => {
+}: LandingPageOptions): HtmlEscapedString | Promise<HtmlEscapedString> => {
   const entrypointCount = entrypoints.length;
   const entrypointLabel = entrypointCount === 1 ? "Entrypoint" : "Entrypoints";
   const hasPayments = Boolean(activePayments);

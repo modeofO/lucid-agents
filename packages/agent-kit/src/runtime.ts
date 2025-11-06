@@ -6,9 +6,12 @@ import { getAgentKitConfig } from "./config";
 import {
   sanitizeAddress,
   ZERO_ADDRESS,
-} from "@lucid-dreams/agent-kit-identity";
+} from "@lucid-agents/agent-kit-identity";
 
-type FetchLike = typeof fetch;
+type FetchLike = (
+  input: RequestInfo | URL,
+  init?: RequestInit
+) => Promise<Response>;
 
 type TypedDataPayload = {
   domain?: Record<string, unknown>;
@@ -278,7 +281,7 @@ export async function createRuntimePaymentContext(
       );
       const fetchWithPayment = attachPreconnect(
         wrapFetchWithPayment(
-          baseFetch,
+          baseFetch as typeof fetch,
           signer,
           resolveMaxPaymentBaseUnits(options.maxPaymentBaseUnits)
         ) as FetchLike,
@@ -353,7 +356,7 @@ export async function createRuntimePaymentContext(
   try {
     const fetchWithPayment = attachPreconnect(
       wrapFetchWithPayment(
-        baseFetch,
+        baseFetch as typeof fetch,
         signer as unknown as Signer,
         resolveMaxPaymentBaseUnits(options.maxPaymentBaseUnits)
       ) as FetchLike,

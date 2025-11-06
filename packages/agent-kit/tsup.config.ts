@@ -17,7 +17,7 @@ export default definePackageConfig({
   external: [
     "@ax-llm/ax",
     "@lucid-dreams/client",
-    "@lucid-dreams/agent-kit-identity",
+    "@lucid-agents/agent-kit-identity",
     "hono",
     "viem",
     "x402",

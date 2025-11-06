@@ -1,6 +1,6 @@
-# @lucid-dreams/agent-kit
+# @lucid-agents/agent-kit
 
-`@lucid-dreams/agent-kit` is a lightweight wrapper around [Hono](https://hono.dev) that turns a plain HTTP server into an agent surface with fully typed entrypoints, discovery endpoints, monetization hooks, and trust metadata. Use it to describe agent capabilities once and let adapters across the monorepo serve them consistently.
+`@lucid-agents/agent-kit` is a lightweight wrapper around [Hono](https://hono.dev) that turns a plain HTTP server into an agent surface with fully typed entrypoints, discovery endpoints, monetization hooks, and trust metadata. Use it to describe agent capabilities once and let adapters across the monorepo serve them consistently.
 
 ## Highlights
 
@@ -17,15 +17,15 @@
 This package is part of the monorepo. From sibling workspaces import:
 
 ```ts
-import { createAgentApp, paymentsFromEnv } from "@lucid-dreams/agent-kit";
-import type { EntrypointDef, AgentMeta } from "@lucid-dreams/agent-kit/types";
+import { createAgentApp, paymentsFromEnv } from "@lucid-agents/agent-kit";
+import type { EntrypointDef, AgentMeta } from "@lucid-agents/agent-kit/types";
 ```
 
 Subpath exports:
 
-- `@lucid-dreams/agent-kit` — main API surface (apps, payments, trust helpers, utilities).
-- `@lucid-dreams/agent-kit/types` — public TypeScript interfaces and helper types.
-- `@lucid-dreams/agent-kit/utils` — focused helpers (`toJsonSchemaOrUndefined`, `paymentsFromEnv`, address utilities, etc.).
+- `@lucid-agents/agent-kit` — main API surface (apps, payments, trust helpers, utilities).
+- `@lucid-agents/agent-kit/types` — public TypeScript interfaces and helper types.
+- `@lucid-agents/agent-kit/utils` — focused helpers (`toJsonSchemaOrUndefined`, `paymentsFromEnv`, address utilities, etc.).
 
 ## Core Concepts
 
@@ -50,7 +50,7 @@ The return value exposes:
 
 ```ts
 import { z } from "zod";
-import { createAgentApp } from "@lucid-dreams/agent-kit";
+import { createAgentApp } from "@lucid-agents/agent-kit";
 
 const { app, addEntrypoint } = createAgentApp({
   name: "hello-agent",
@@ -129,7 +129,7 @@ import {
   configureAgentKit,
   getAgentKitConfig,
   paymentsFromEnv,
-} from "@lucid-dreams/agent-kit";
+} from "@lucid-agents/agent-kit";
 
 configureAgentKit({
   payments: { defaultPrice: "750" },
@@ -153,11 +153,11 @@ When a `PaymentsConfig` is active, `createAgentApp` automatically wraps invoke/s
 `resolveEntrypointPrice(entrypoint, payments, kind)` encapsulates the merge logic.
 
 For authenticated wallet access, pair your agent with
-`@lucid-dreams/agent-auth` and reuse the generated SDK surface:
+`@lucid-agents/agent-auth` and reuse the generated SDK surface:
 
 ```ts
-import { AgentRuntime } from "@lucid-dreams/agent-auth";
-import { createRuntimePaymentContext } from "@lucid-dreams/agent-kit";
+import { AgentRuntime } from "@lucid-agents/agent-auth";
+import { createRuntimePaymentContext } from "@lucid-agents/agent-kit";
 
 const { runtime } = await AgentRuntime.load({
   wallet: {
@@ -209,13 +209,13 @@ You rarely need to call `buildManifest` directly; `createAgentApp` handles it au
 
 ## Trust & Identity (ERC-8004)
 
-Trust metadata is modelled by `TrustConfig`. For ERC-8004 identity management, use the dedicated `@lucid-dreams/agent-kit-identity` package:
+Trust metadata is modelled by `TrustConfig`. For ERC-8004 identity management, use the dedicated `@lucid-agents/agent-kit-identity` package:
 
 ```ts
 import {
   createAgentIdentity,
   getTrustConfig,
-} from "@lucid-dreams/agent-kit-identity";
+} from "@lucid-agents/agent-kit-identity";
 
 // Register agent identity with auto-registration
 const identity = await createAgentIdentity({
@@ -241,7 +241,7 @@ The package also exports lower-level helpers for advanced use cases:
 - `signAgentDomainProof({ domain, address, chainId, signer })` — manually sign domain ownership proofs.
 - `buildTrustConfigFromIdentity(record, { signature, chainId, namespace, trustOverrides })` — convert registry records into `TrustConfig`.
 
-See [`@lucid-dreams/agent-kit-identity` documentation](../agent-kit-identity/README.md) for complete examples and API reference.
+See [`@lucid-agents/agent-kit-identity` documentation](../agent-kit-identity/README.md) for complete examples and API reference.
 
 ## x402 + AxFlow utilities
 

@@ -153,7 +153,7 @@ describe("buildManifest", () => {
       key: "echo",
       description: "echoes",
       input: z.object({ text: z.string() }),
-      output: z.object({ text: z.string() }).optional(),
+      output: z.object({ text: z.string() }),
       stream: async () => ({ status: "succeeded" }),
     },
     {

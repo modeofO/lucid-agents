@@ -74,7 +74,10 @@ describe("runtime payments", () => {
   it("wraps fetch with x402 handling using the runtime wallet", async () => {
     const { runtime, calls } = makeRuntimeStub();
 
-    const fetchCalls: Array<{ input: RequestInfo; init?: RequestInit }> = [];
+    const fetchCalls: Array<{
+      input: string | URL | Request;
+      init?: RequestInit;
+    }> = [];
     let attempt = 0;
     const baseFetch = mock(
       async (

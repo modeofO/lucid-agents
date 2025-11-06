@@ -1,4 +1,4 @@
-# @lucid-dreams/agent-kit-identity
+# @lucid-agents/agent-kit-identity
 
 ERC-8004 identity helpers for Lucid agents. Register your agent on the ERC-8004 registry and include verifiable on-chain identity in your agent manifest.
 
@@ -25,7 +25,7 @@ This package enables you to:
 ## Installation
 
 ```bash
-bun add @lucid-dreams/agent-kit-identity
+bun add @lucid-agents/agent-kit-identity
 ```
 
 ## Quick Start
@@ -53,7 +53,7 @@ REGISTER_IDENTITY=true
 ### 2. Register Your Agent
 
 ```typescript
-import { createAgentIdentity } from "@lucid-dreams/agent-kit-identity";
+import { createAgentIdentity } from "@lucid-agents/agent-kit-identity";
 
 // Register with auto-configuration from env vars
 const identity = await createAgentIdentity({
@@ -80,7 +80,7 @@ https://my-agent.example.com/.well-known/agent-metadata.json
 You can also generate custom metadata using the helper:
 
 ```typescript
-import { generateAgentMetadata } from "@lucid-dreams/agent-kit-identity";
+import { generateAgentMetadata } from "@lucid-agents/agent-kit-identity";
 
 const metadata = generateAgentMetadata(identity, {
   name: "My Agent",
@@ -99,8 +99,8 @@ const metadata = generateAgentMetadata(identity, {
 import {
   createAgentIdentity,
   getTrustConfig,
-} from "@lucid-dreams/agent-kit-identity";
-import { createAgentApp } from "@lucid-dreams/agent-kit";
+} from "@lucid-agents/agent-kit-identity";
+import { createAgentApp } from "@lucid-agents/agent-kit";
 
 // 1. Create identity with all three registry clients
 const identity = await createAgentIdentity({

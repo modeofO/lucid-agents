@@ -1,4 +1,4 @@
-# @lucid-dreams/create-agent-kit
+# @lucid-agents/create-agent-kit
 
 ## 1.0.0
 

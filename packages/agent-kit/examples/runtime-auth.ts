@@ -7,7 +7,7 @@ import {
   createAgentApp,
   configureAgentKit,
   getAgentKitConfig,
-} from "@lucid-dreams/agent-kit";
+} from "@lucid-agents/agent-kit";
 import {
   AgentRuntime,
   MemoryStorageAdapter,

@@ -61,14 +61,18 @@ test PACKAGE:
 # Typecheck all packages
 typecheck-all:
     @echo -e $'{{BOLD}}{{CYAN}}Typechecking all packages...{{RESET}}'
-    bun x tsc -p packages/agent-kit/tsconfig.json --noEmit
+    bun x tsc --build packages/agent-kit-identity/tsconfig.json
     bun x tsc -p packages/agent-kit-identity/tsconfig.json --noEmit
+    bun x tsc --build packages/create-agent-kit/tsconfig.json
     bun x tsc -p packages/create-agent-kit/tsconfig.json --noEmit
+    bun x tsc --build packages/agent-kit/tsconfig.json
+    bun x tsc -p packages/agent-kit/tsconfig.json --noEmit
     @echo -e $'{{BOLD}}{{GREEN}}✅ All packages typechecked!{{RESET}}'
 
 # Typecheck a specific package
 typecheck PACKAGE:
     @echo -e $'{{BOLD}}{{CYAN}}Typechecking {{PACKAGE}}...{{RESET}}'
+    bun x tsc --build packages/{{PACKAGE}}/tsconfig.json
     bun x tsc -p packages/{{PACKAGE}}/tsconfig.json --noEmit
     @echo -e $'{{BOLD}}{{GREEN}}✅ {{PACKAGE}} typechecked!{{RESET}}'
 

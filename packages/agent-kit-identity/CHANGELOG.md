@@ -1,4 +1,4 @@
-# @lucid-dreams/agent-kit-identity
+# @lucid-agents/agent-kit-identity
 
 ## 1.0.0
 

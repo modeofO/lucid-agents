@@ -5,12 +5,15 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "outDir": "dist",
-    "composite": false,
+    "composite": true,
     "emitDeclarationOnly": false,
     "resolveJsonModule": true,
     "strict": true,
     "sourceMap": true,
-    "types": ["bun-types", "node"],
+    "types": [
+      "bun-types",
+      "node"
+    ],
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "noUncheckedIndexedAccess": true,
@@ -19,5 +22,8 @@
     "noImplicitReturns": true,
     "noImplicitAny": true
   },
-  "include": ["src", "tests"]
+  "include": [
+    "src",
+    "tests"
+  ]
 }

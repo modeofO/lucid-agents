@@ -3,8 +3,8 @@ import {
   AgentKitConfig,
   createAgentApp,
   createAxLLMClient,
-} from "@lucid-dreams/agent-kit";
-import { paymentsFromEnv } from "@lucid-dreams/agent-kit/utils";
+} from "@lucid-agents/agent-kit";
+import { paymentsFromEnv } from "@lucid-agents/agent-kit/utils";
 import { flow } from "@ax-llm/ax";
 
 /**

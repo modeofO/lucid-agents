@@ -3,7 +3,7 @@ import {
   AgentKitConfig,
   createAgentApp,
   createAxLLMClient,
-} from "@lucid-dreams/agent-kit";
+} from "@lucid-agents/agent-kit";
 import { flow } from "@ax-llm/ax";
 
 /**

@@ -153,7 +153,7 @@ export type AgentIdentity = BootstrapIdentityResult & {
  *
  * @example
  * ```ts
- * import { createAgentIdentity } from "@lucid-dreams/agent-kit-identity";
+ * import { createAgentIdentity } from "@lucid-agents/agent-kit-identity";
  *
  * // Minimal usage - uses env vars for everything
  * const identity = await createAgentIdentity({ autoRegister: true });
@@ -357,7 +357,7 @@ export async function createAgentIdentity(
  *
  * @example
  * ```ts
- * import { registerAgent } from "@lucid-dreams/agent-kit-identity";
+ * import { registerAgent } from "@lucid-agents/agent-kit-identity";
  *
  * const result = await registerAgent({
  *   domain: "my-agent.example.com"
@@ -385,7 +385,7 @@ export async function registerAgent(
  *
  * @example
  * ```ts
- * import { createAgentIdentity, getTrustConfig } from "@lucid-dreams/agent-kit-identity";
+ * import { createAgentIdentity, getTrustConfig } from "@lucid-agents/agent-kit-identity";
  *
  * const identity = await createAgentIdentity({ autoRegister: true });
  * const trustConfig = getTrustConfig(identity);

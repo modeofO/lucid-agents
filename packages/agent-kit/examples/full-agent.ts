@@ -15,12 +15,12 @@ import {
   createAgentApp,
   createRuntimePaymentContext,
   type AgentKitConfig,
-} from "@lucid-dreams/agent-kit";
+} from "@lucid-agents/agent-kit";
 import {
   createAgentIdentity,
   getTrustConfig,
   type AgentIdentity,
-} from "@lucid-dreams/agent-kit-identity";
+} from "@lucid-agents/agent-kit-identity";
 import {
   AgentRuntime,
   MemoryStorageAdapter,

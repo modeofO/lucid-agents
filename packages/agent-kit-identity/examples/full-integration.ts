@@ -13,7 +13,7 @@
 import { createAgentIdentity, getTrustConfig } from "../src/index.js";
 
 // Note: Import from your actual agent-kit package
-// import { createAgentApp } from "@lucid-dreams/agent-kit";
+// import { createAgentApp } from "@lucid-agents/agent-kit";
 
 async function main() {
   console.log("🤖 Agent Kit + ERC-8004 Integration\n");

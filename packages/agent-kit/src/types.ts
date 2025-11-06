@@ -5,13 +5,13 @@ import type {
   TrustConfig,
   RegistrationEntry,
   TrustModel,
-} from "@lucid-dreams/agent-kit-identity";
+} from "@lucid-agents/agent-kit-identity";
 
 export type {
   TrustConfig,
   RegistrationEntry,
   TrustModel,
-} from "@lucid-dreams/agent-kit-identity";
+} from "@lucid-agents/agent-kit-identity";
 
 export type Usage = {
   prompt_tokens?: number;

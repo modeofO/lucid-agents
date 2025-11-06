@@ -135,7 +135,7 @@ const payments = paymentsFromEnv(); // returns the config you supplied earlier
 ```
 
 For wallet-authenticated calls, pair your agent with
-`@lucid-dreams/agent-auth` and reuse its `AgentRuntime` helpers instead of the
+`@lucid-agents/agent-auth` and reuse its `AgentRuntime` helpers instead of the
 now-removed `createAgentPaymentContext` flow.
 `createRuntimePaymentContext({ runtime })` will hand you the same x402-enabled
 fetch + signer wiring backed by the agent wallet.
