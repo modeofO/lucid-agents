@@ -38,7 +38,7 @@ module.exports = {
     ],
 
     // General rules
-    'no-unused-vars': 'warn',
+    'no-unused-vars': 'off', // Disabled in favor of @typescript-eslint and unused-imports rules
     'prefer-const': 'error',
     'no-var': 'error',
   },
