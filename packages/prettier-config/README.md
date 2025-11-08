@@ -81,7 +81,7 @@ Individual packages inherit this automatically.
 
 Always ignore these:
 
-```
+```gitignore
 dist/
 build/
 *.tsbuildinfo
@@ -94,7 +94,7 @@ node_modules/
 
 Don't format these (they have specific formatting):
 
-```
+```gitignore
 tsconfig.json
 tsconfig.*.json
 *.config.js
@@ -106,14 +106,14 @@ tsconfig.*.json
 
 **For packages with generated code:**
 
-```
+```gitignore
 src/generated/
 src/abi/*.json
 ```
 
 **For CLI packages with templates:**
 
-```
+```gitignore
 templates/
 ```
 
@@ -141,7 +141,7 @@ Check `.prettierignore` - the pattern might be too broad.
 
 Add them to `.prettierignore`:
 
-```
+```gitignore
 tsconfig.json
 *.config.js
 ```
@@ -150,6 +150,6 @@ tsconfig.json
 
 Add the templates directory:
 
-```
+```gitignore
 templates/
 ```
