@@ -176,7 +176,7 @@ export async function runCli(
   await assertTargetDirectory(targetDir);
   const wizardAnswers = await collectWizardAnswers({
     template,
-    prompt,
+    prompt: parsed.options.skipWizard ? undefined : prompt,
     context: {
       AGENT_NAME: projectDirName,
       PACKAGE_NAME: packageName,
@@ -263,7 +263,9 @@ function printHelp(logger: RunLogger) {
   logger.log("Usage: bunx @lucid-agents/create-agent-kit <app-name> [options]");
   logger.log("");
   logger.log("Options:");
-  logger.log("  -t, --template <id>   Select template (blank, axllm, axllm-flow, identity)");
+  logger.log(
+    "  -t, --template <id>   Select template (blank, axllm, axllm-flow, identity)"
+  );
   logger.log("  -i, --install         Run bun install after scaffolding");
   logger.log("  --no-install          Skip bun install");
   logger.log("  --wizard=no           Skip wizard, use template defaults");
@@ -272,7 +274,9 @@ function printHelp(logger: RunLogger) {
   logger.log("");
   logger.log("Examples:");
   logger.log("  bunx @lucid-agents/create-agent-kit my-agent");
-  logger.log("  bunx @lucid-agents/create-agent-kit my-agent --template=identity --install");
+  logger.log(
+    "  bunx @lucid-agents/create-agent-kit my-agent --template=identity --install"
+  );
   logger.log("  bunx @lucid-agents/create-agent-kit my-agent --wizard=no");
 }
 
@@ -749,7 +753,10 @@ async function applyTemplateTransforms(
   await updatePackageJson(targetDir, params.packageName);
 
   // Only replace tokens in README.md (agent.ts uses process.env)
-  await replaceTemplatePlaceholders(join(targetDir, "README.md"), params.replacements);
+  await replaceTemplatePlaceholders(
+    join(targetDir, "README.md"),
+    params.replacements
+  );
 
   await removeTemplateArtifacts(targetDir);
 }

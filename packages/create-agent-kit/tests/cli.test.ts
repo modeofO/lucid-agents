@@ -107,18 +107,18 @@ describe("create-agent-kit CLI", () => {
     expect(readme).not.toContain("{{");
 
     // agent.ts uses process.env
-    expect(agentSrc).toContain('process.env.AGENT_NAME');
-    expect(agentSrc).toContain('process.env.AGENT_VERSION');
-    expect(agentSrc).toContain('process.env.AGENT_DESCRIPTION');
+    expect(agentSrc).toContain("process.env.AGENT_NAME");
+    expect(agentSrc).toContain("process.env.AGENT_VERSION");
+    expect(agentSrc).toContain("process.env.AGENT_DESCRIPTION");
     expect(agentSrc).toContain('key: "echo"');
-    expect(agentSrc).toContain('useConfigPayments: true');
+    expect(agentSrc).toContain("useConfigPayments: true");
     expect(agentSrc).not.toContain("{{");
 
     // .env has defaults from template.json
-    expect(envFile).toContain('AGENT_NAME=demo-agent');
-    expect(envFile).toContain('AGENT_VERSION=0.1.0');
-    expect(envFile).toContain('PAYMENTS_RECEIVABLE_ADDRESS=');
-    expect(envFile).toContain('PRIVATE_KEY=');
+    expect(envFile).toContain("AGENT_NAME=demo-agent");
+    expect(envFile).toContain("AGENT_VERSION=0.1.0");
+    expect(envFile).toContain("PAYMENTS_RECEIVABLE_ADDRESS=");
+    expect(envFile).toContain("PRIVATE_KEY=");
   });
 
   it("applies wizard answers to generate .env file", async () => {
@@ -129,7 +129,10 @@ describe("create-agent-kit CLI", () => {
       ["What version should the agent start at?", "1.0.0"],
       ["Facilitator URL", "https://facilitator.example"],
       ["Payment network identifier", "base"],
-      ["Receivable address (address that receives payments)", "0xabc0000000000000000000000000000000000000"],
+      [
+        "Receivable address (address that receives payments)",
+        "0xabc0000000000000000000000000000000000000",
+      ],
       ["Default price in base units", "4200"],
       ["Wallet private key (leave empty to add later)", ""],
     ]);
@@ -153,21 +156,25 @@ describe("create-agent-kit CLI", () => {
     const readme = await readFile(join(projectDir, "README.md"), "utf8");
 
     // agent.ts now uses process.env
-    expect(agentSrc).toContain('process.env.AGENT_NAME');
-    expect(agentSrc).toContain('process.env.AGENT_VERSION');
-    expect(agentSrc).toContain('process.env.AGENT_DESCRIPTION');
+    expect(agentSrc).toContain("process.env.AGENT_NAME");
+    expect(agentSrc).toContain("process.env.AGENT_VERSION");
+    expect(agentSrc).toContain("process.env.AGENT_DESCRIPTION");
     expect(agentSrc).toContain('key: "echo"');
-    expect(agentSrc).toContain('useConfigPayments: true');
+    expect(agentSrc).toContain("useConfigPayments: true");
 
     // .env contains wizard answers
-    expect(envFile).toContain('AGENT_NAME=quote-agent');
-    expect(envFile).toContain('AGENT_VERSION=1.0.0');
-    expect(envFile).toContain('AGENT_DESCRIPTION=Quote assistant for pricing.');
-    expect(envFile).toContain('PAYMENTS_FACILITATOR_URL=https://facilitator.example');
-    expect(envFile).toContain('PAYMENTS_RECEIVABLE_ADDRESS=0xabc0000000000000000000000000000000000000');
-    expect(envFile).toContain('PAYMENTS_NETWORK=base');
-    expect(envFile).toContain('PAYMENTS_DEFAULT_PRICE=4200');
-    expect(envFile).toContain('PRIVATE_KEY=');
+    expect(envFile).toContain("AGENT_NAME=quote-agent");
+    expect(envFile).toContain("AGENT_VERSION=1.0.0");
+    expect(envFile).toContain("AGENT_DESCRIPTION=Quote assistant for pricing.");
+    expect(envFile).toContain(
+      "PAYMENTS_FACILITATOR_URL=https://facilitator.example"
+    );
+    expect(envFile).toContain(
+      "PAYMENTS_RECEIVABLE_ADDRESS=0xabc0000000000000000000000000000000000000"
+    );
+    expect(envFile).toContain("PAYMENTS_NETWORK=base");
+    expect(envFile).toContain("PAYMENTS_DEFAULT_PRICE=4200");
+    expect(envFile).toContain("PRIVATE_KEY=");
 
     // README uses agent name
     expect(readme).toContain("quote-agent");
@@ -291,5 +298,40 @@ describe("create-agent-kit CLI", () => {
     const projectDir = join(cwd, "project");
     const readme = await readFile(join(projectDir, "README.md"), "utf8");
     expect(readme).toContain("<!-- template:beta -->");
+  });
+
+  it("does not invoke prompt API when --wizard=no is used", async () => {
+    const cwd = await createTempDir();
+    const { logger } = createLogger();
+
+    // Create a prompt that throws if any method is called
+    const prompt: PromptApi = {
+      select: async () => {
+        throw new Error("select() should not be called with --wizard=no");
+      },
+      confirm: async () => {
+        throw new Error("confirm() should not be called with --wizard=no");
+      },
+      input: async () => {
+        throw new Error("input() should not be called with --wizard=no");
+      },
+    };
+
+    // Should not throw because prompt is never invoked
+    await runCli(["no-prompt-agent", "--template=blank", "--wizard=no"], {
+      cwd,
+      logger,
+      prompt,
+    });
+
+    // Verify project was created successfully with defaults
+    const projectDir = join(cwd, "no-prompt-agent");
+    const pkg = await readJson(join(projectDir, "package.json"));
+    const envFile = await readFile(join(projectDir, ".env"), "utf8");
+
+    expect(pkg.name).toBe("no-prompt-agent");
+    expect(envFile).toContain("AGENT_NAME=no-prompt-agent");
+    expect(envFile).toContain("AGENT_VERSION=0.1.0");
+    expect(envFile).toContain("PAYMENTS_NETWORK=base-sepolia");
   });
 });
