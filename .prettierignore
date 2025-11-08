@@ -47,6 +47,4 @@ tsconfig.*.json
 
 # Documentation that should be manually formatted
 CHANGELOG.md
-README.md
-**/README.md
 

@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "Shared ESLint configuration for Lucid Agents monorepo",
   "main": "index.js",
-  "private": true
+  "private": true,
+  "files": [
+    "index.js",
+    ".eslintrc.cjs.example",
+    "README.md"
+  ]
 }
 

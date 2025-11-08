@@ -13,16 +13,17 @@ node_modules/
 .DS_Store
 Thumbs.db
 
-# Config files
+# Config files (don't format these)
 tsconfig.json
 tsconfig.*.json
 tsup.config.ts
+*.config.js
+*.config.ts
 .eslintrc.cjs
 .eslintrc.js
 
-# Templates (these are scaffolded with their own formatting)
-templates/
-
 # Documentation (manually formatted)
 CHANGELOG.md
+
+# Add any package-specific ignores below:
 

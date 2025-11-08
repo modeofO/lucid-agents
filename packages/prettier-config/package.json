@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "Shared Prettier configuration for Lucid Agents monorepo",
   "main": "index.js",
-  "private": true
+  "private": true,
+  "files": [
+    "index.js",
+    ".prettierignore.example",
+    "README.md"
+  ]
 }
 
