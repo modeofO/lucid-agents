@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useAccount, useWalletClient } from "wagmi";
+import { useWalletClient } from "wagmi";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   getHealth,
@@ -324,7 +324,6 @@ function HomePage() {
   const meta = dashboard.meta;
 
   const { data: walletClient } = useWalletClient();
-  const wallet = useAppKitWallet();
 
   const origin =
     typeof window !== "undefined" ? window.location.origin : "http://localhost";
@@ -437,8 +436,6 @@ function HomePage() {
 
   const { copyValue: copyCurl, flag: curlCopied } = useCopyFeedback();
   const { copyValue: copyManifest, flag: manifestCopied } = useCopyFeedback();
-  const { copyValue: copyLocalSnippet, flag: localSnippetCopied } =
-    useCopyFeedback();
   const { copyValue: copyAppKitSnippet, flag: appKitSnippetCopied } =
     useCopyFeedback();
 
@@ -463,25 +460,8 @@ function HomePage() {
             entry.networkId ?? payments?.network ?? undefined
           );
 
-          if (wallet.mode === "local" && wallet.privateKey) {
-            const mod = await import("x402-fetch");
-            signer = await mod.createSigner(network.id, wallet.privateKey);
-            paymentUsed = true;
-          } else if (wallet.mode === "appkit" && walletClient) {
-            signer = {
-              getAddress: async () => walletClient.account.address,
-              signMessage: (message: string | Uint8Array) =>
-                walletClient.signMessage({
-                  account: walletClient.account,
-                  message:
-                    typeof message === "string" ? message : { raw: message },
-                }),
-              signTypedData: (params: any) =>
-                walletClient.signTypedData({
-                  account: walletClient.account,
-                  ...params,
-                }),
-            };
+          if (walletClient) {
+            signer = walletClient;
             paymentUsed = true;
           }
         } catch {
@@ -506,13 +486,7 @@ function HomePage() {
         });
       }
     },
-    [
-      payments?.network,
-      updateEntryState,
-      wallet.mode,
-      wallet.privateKey,
-      walletClient,
-    ]
+    [payments?.network, updateEntryState, walletClient]
   );
 
   const handleStream = useCallback(
@@ -541,24 +515,8 @@ function HomePage() {
           const network = getNetworkInfo(
             entry.networkId ?? payments?.network ?? undefined
           );
-          if (wallet.mode === "local" && wallet.privateKey) {
-            const mod = await import("x402-fetch");
-            signer = await mod.createSigner(network.id, wallet.privateKey);
-          } else if (wallet.mode === "appkit" && walletClient) {
-            signer = {
-              getAddress: async () => walletClient.account.address,
-              signMessage: (message: string | Uint8Array) =>
-                walletClient.signMessage({
-                  account: walletClient.account,
-                  message:
-                    typeof message === "string" ? message : { raw: message },
-                }),
-              signTypedData: (params: any) =>
-                walletClient.signTypedData({
-                  account: walletClient.account,
-                  ...params,
-                }),
-            };
+          if (walletClient) {
+            signer = walletClient;
             // Streaming does not mark payment used up-front; chunk handlers show success.
           }
         } catch {
@@ -608,13 +566,7 @@ function HomePage() {
         });
       }
     },
-    [
-      payments?.network,
-      updateEntryState,
-      wallet.mode,
-      wallet.privateKey,
-      walletClient,
-    ]
+    [payments?.network, updateEntryState, walletClient]
   );
 
   useEffect(() => {
@@ -628,22 +580,6 @@ function HomePage() {
     ? `${origin}${exampleCard.invokePath}`
     : `${origin}/api/agent/entrypoints/{key}/invoke`;
   const networkInfo = getNetworkInfo(payments?.network ?? undefined);
-
-  const localWalletSnippet =
-    wallet.mode === "local" && wallet.privateKey
-      ? [
-          'import { createSigner, wrapFetchWithPayment } from "x402-fetch";',
-          "",
-          `const signer = await createSigner("${networkInfo.id}", "${wallet.privateKey}");`,
-          "const fetchWithPayment = wrapFetchWithPayment(fetch, signer);",
-          "",
-          `const response = await fetchWithPayment("${exampleInvokeUrl}", {`,
-          '  method: "POST",',
-          '  headers: { "Content-Type": "application/json" },',
-          "  body: JSON.stringify({ input: {} }),",
-          "});",
-        ].join("\n")
-      : "Connect a local wallet to generate a ready-to-run signer snippet.";
 
   const appKitSnippet = [
     'import { useWalletClient } from "wagmi";',
@@ -1096,30 +1032,6 @@ function HomePage() {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            {wallet.mode === "local" && wallet.privateKey && (
-              <article className="group rounded-2xl border border-zinc-800/80 bg-gradient-to-br from-zinc-900/80 to-zinc-900/40 p-6 backdrop-blur-sm transition hover:border-zinc-700">
-                <header className="mb-4 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-zinc-100">
-                      Local Wallet
-                    </span>
-                    <span className="rounded-full border border-emerald-500/50 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
-                      x402
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => copyLocalSnippet(localWalletSnippet)}
-                    className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-zinc-600 hover:bg-zinc-800 hover:text-zinc-100"
-                  >
-                    {localSnippetCopied ? "✓ Copied!" : "Copy"}
-                  </button>
-                </header>
-                <pre className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border border-zinc-800/50 bg-zinc-950/80 p-4 font-mono text-xs leading-relaxed text-zinc-300 shadow-inner">
-                  {localWalletSnippet}
-                </pre>
-              </article>
-            )}
-
             <article className="group rounded-2xl border border-zinc-800/80 bg-gradient-to-br from-zinc-900/80 to-zinc-900/40 p-6 backdrop-blur-sm transition hover:border-zinc-700">
               <header className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -1153,17 +1065,4 @@ function HomePage() {
       </div>
     </div>
   );
-}
-
-function useAppKitWallet() {
-  const { address, chainId, isConnected } = useAccount();
-  const { data: walletClient } = useWalletClient();
-  return {
-    mode: "appkit" as "appkit" | "local",
-    address,
-    chainId,
-    isConnected,
-    privateKey: null as string | null,
-    walletClient,
-  };
 }
