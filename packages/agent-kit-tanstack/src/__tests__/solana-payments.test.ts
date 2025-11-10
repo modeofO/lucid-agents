@@ -46,13 +46,9 @@ describe('TanStack Solana Payments', () => {
     const runtime = createRuntime(solanaPayments);
     const capturedRoutes: RoutesConfig[] = [];
 
-    const middlewareFactory = ((
-      _payTo,
-      _routes,
-      _facilitator,
-      _paywall
-    ) => {
-      return (() => Promise.resolve(new Response())) as TanStackRequestMiddleware;
+    const middlewareFactory = ((_payTo, _routes, _facilitator, _paywall) => {
+      return (() =>
+        Promise.resolve(new Response())) as TanStackRequestMiddleware;
     }) satisfies typeof import('@lucid-agents/x402-tanstack-start').paymentMiddleware;
 
     const spyingFactory: typeof middlewareFactory = (
@@ -114,7 +110,7 @@ describe('TanStack Solana Payments', () => {
       const config: PaymentsConfig = {
         payTo: address,
         facilitatorUrl: 'https://facilitator.test',
-        network: 'solana-mainnet',
+        network: 'solana',
         defaultPrice: '1000',
       };
 
@@ -141,14 +137,8 @@ describe('TanStack Solana Payments', () => {
       const runtime = createRuntime(config);
       const capturedRoutes: RoutesConfig[] = [];
 
-      const middlewareFactory = ((
-        _payTo,
-        _routes,
-        _facilitator,
-        _paywall
-      ) => {
-        return (() =>
-          Promise.resolve(new Response())) as any;
+      const middlewareFactory = ((_payTo, _routes, _facilitator, _paywall) => {
+        return (() => Promise.resolve(new Response())) as any;
       }) satisfies typeof import('@lucid-agents/x402-tanstack-start').paymentMiddleware;
 
       const spyingFactory: typeof middlewareFactory = (
@@ -183,13 +173,9 @@ describe('TanStack Solana Payments', () => {
     const runtime = createRuntime(solanaPayments);
     const capturedRoutes: RoutesConfig[] = [];
 
-    const middlewareFactory = ((
-      _payTo,
-      _routes,
-      _facilitator,
-      _paywall
-    ) => {
-      return (() => Promise.resolve(new Response())) as TanStackRequestMiddleware;
+    const middlewareFactory = ((_payTo, _routes, _facilitator, _paywall) => {
+      return (() =>
+        Promise.resolve(new Response())) as TanStackRequestMiddleware;
     }) satisfies typeof import('@lucid-agents/x402-tanstack-start').paymentMiddleware;
 
     const spyingFactory: typeof middlewareFactory = (
@@ -230,13 +216,9 @@ describe('TanStack Solana Payments', () => {
     const runtime = createRuntime(solanaPayments);
     const capturedRoutes: RoutesConfig[] = [];
 
-    const middlewareFactory = ((
-      _payTo,
-      _routes,
-      _facilitator,
-      _paywall
-    ) => {
-      return (() => Promise.resolve(new Response())) as TanStackRequestMiddleware;
+    const middlewareFactory = ((_payTo, _routes, _facilitator, _paywall) => {
+      return (() =>
+        Promise.resolve(new Response())) as TanStackRequestMiddleware;
     }) satisfies typeof import('@lucid-agents/x402-tanstack-start').paymentMiddleware;
 
     const spyingFactory: typeof middlewareFactory = (
@@ -270,5 +252,20 @@ describe('TanStack Solana Payments', () => {
       streamRoutes['POST /api/agent/entrypoints/generate/stream'];
     expect(generateStreamConfig.price).toBe('8000');
   });
-});
 
+  it('rejects unsupported network at configuration time', () => {
+    const invalidPayments: PaymentsConfig = {
+      payTo: '9yPGxVrYi7C5JLMGjEZhK8qQ4tn7SzMWwQHvz3vGJCKz',
+      facilitatorUrl: 'https://facilitator.test',
+      network: 'solana-mainnet' as any, // Invalid - should be 'solana'
+      defaultPrice: '10000',
+    };
+
+    const runtime = createRuntime(invalidPayments);
+
+    // Should throw when creating paywall with invalid network
+    expect(() => {
+      createTanStackPaywall({ runtime });
+    }).toThrow(/Unsupported payment network: solana-mainnet/);
+  });
+});

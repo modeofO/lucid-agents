@@ -171,7 +171,7 @@ bunx @lucid-agents/create-agent-kit my-agent --network=base --non-interactive
 - For identity template: EVM private key is for identity registration, payment address can be Solana
 - Payment address can be shared across multiple agents
 
-````
+````bash
 
 ### Non-Interactive Mode with Template Arguments
 

@@ -165,5 +165,32 @@ describe('Hono Solana Payments', () => {
     expect(payment.network).toBe('solana-devnet');
     expect(payment.payee).toBe('9yPGxVrYi7C5JLMGjEZhK8qQ4tn7SzMWwQHvz3vGJCKz');
   });
+
+  it('rejects unsupported network at configuration time', () => {
+    const invalidPayments = {
+      payTo: '9yPGxVrYi7C5JLMGjEZhK8qQ4tn7SzMWwQHvz3vGJCKz',
+      facilitatorUrl: 'https://facilitator.test' as const,
+      network: 'solana-mainnet' as any, // Invalid - should be 'solana'
+      defaultPrice: '10000',
+    };
+
+    const { addEntrypoint } = createAgentApp(
+      { name: 'test', version: '1.0.0' },
+      {
+        config: { payments: invalidPayments },
+        useConfigPayments: true,
+      }
+    );
+
+    // Should throw when adding entrypoint (validation happens during paywall setup)
+    expect(() => {
+      addEntrypoint({
+        key: 'test',
+        async handler() {
+          return { output: { ok: true } };
+        },
+      });
+    }).toThrow(/Unsupported payment network: solana-mainnet/);
+  });
 });
 
