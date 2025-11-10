@@ -1,10 +1,10 @@
-import { Hono } from "hono";
-import type { AgentMeta, EntrypointDef } from "@lucid-agents/agent-kit";
-import { withPayments } from "./paywall";
+import { Hono } from 'hono';
+import type { AgentMeta, EntrypointDef } from '@lucid-agents/agent-kit';
+import { withPayments } from './paywall';
 import {
   createAgentHttpRuntime,
   type CreateAgentHttpOptions,
-} from "@lucid-agents/agent-kit";
+} from '@lucid-agents/agent-kit';
 
 export type CreateAgentAppOptions = CreateAgentHttpOptions & {
   /**
@@ -19,10 +19,7 @@ export type CreateAgentAppOptions = CreateAgentHttpOptions & {
   afterMount?: (app: Hono) => void;
 };
 
-export function createAgentApp(
-  meta: AgentMeta,
-  opts?: CreateAgentAppOptions
-) {
+export function createAgentApp(meta: AgentMeta, opts?: CreateAgentAppOptions) {
   const runtime = createAgentHttpRuntime(meta, opts);
   const app = new Hono();
 
@@ -37,47 +34,46 @@ export function createAgentApp(
       app,
       path: invokePath,
       entrypoint,
-      kind: "invoke",
+      kind: 'invoke',
       payments: runtime.payments,
     });
 
-    app.post(invokePath, (c) =>
+    app.post(invokePath, c =>
       runtime.handlers.invoke(c.req.raw, { key: entrypoint.key })
     );
 
-    if (entrypoint.stream) {
-      withPayments({
-        app,
-        path: streamPath,
-        entrypoint,
-        kind: "stream",
-        payments: runtime.payments,
-      });
+    // Always register stream route for API consistency, even if entrypoint.stream is undefined.
+    // The runtime handler will return 400 "stream_not_supported" if streaming isn't configured.
+    // This ensures clients get a proper error (400) rather than "route not found" (404).
+    // Benefits: AI agents can optimistically try streaming without querying the manifest first,
+    // then fall back to invoke on 400. This reduces round-trips and simplifies client logic.
+    withPayments({
+      app,
+      path: streamPath,
+      entrypoint,
+      kind: 'stream',
+      payments: runtime.payments,
+    });
 
-      app.post(streamPath, (c) =>
-        runtime.handlers.stream(c.req.raw, { key: entrypoint.key })
-      );
-    }
+    app.post(streamPath, c =>
+      runtime.handlers.stream(c.req.raw, { key: entrypoint.key })
+    );
   };
 
   // Core routes
-  app.get("/health", (c) => runtime.handlers.health(c.req.raw));
-  app.get("/entrypoints", (c) =>
-    runtime.handlers.entrypoints(c.req.raw)
-  );
-  app.get("/.well-known/agent.json", (c) =>
-    runtime.handlers.manifest(c.req.raw)
-  );
-  app.get("/.well-known/agent-card.json", (c) =>
+  app.get('/health', c => runtime.handlers.health(c.req.raw));
+  app.get('/entrypoints', c => runtime.handlers.entrypoints(c.req.raw));
+  app.get('/.well-known/agent.json', c => runtime.handlers.manifest(c.req.raw));
+  app.get('/.well-known/agent-card.json', c =>
     runtime.handlers.manifest(c.req.raw)
   );
 
-  app.get("/favicon.svg", (c) => runtime.handlers.favicon(c.req.raw));
+  app.get('/favicon.svg', c => runtime.handlers.favicon(c.req.raw));
 
   if (runtime.handlers.landing && opts?.landingPage !== false) {
-    app.get("/", (c) => runtime.handlers.landing!(c.req.raw));
+    app.get('/', c => runtime.handlers.landing!(c.req.raw));
   } else {
-    app.get("/", (c) => c.text("Landing disabled", 404));
+    app.get('/', c => c.text('Landing disabled', 404));
   }
 
   const addEntrypoint = (def: EntrypointDef) => {
@@ -103,8 +99,5 @@ export function createAgentApp(
     agent: runtime.agent,
     addEntrypoint,
     config: runtime.config,
-    get payments() {
-      return runtime.payments;
-    },
   };
 }

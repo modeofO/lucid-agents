@@ -4,11 +4,12 @@ import { fileURLToPath } from 'node:url';
 const PACKAGE_ROOT = fileURLToPath(new URL('..', import.meta.url));
 const ADAPTER_FILES_ROOT = join(PACKAGE_ROOT, 'adapters');
 
-type AdapterSnippets = {
+export type AdapterSnippets = {
   imports: string;
-  configOverrides: string;
+  preSetup: string;
   appCreation: string;
   entrypointRegistration: string;
+  postSetup: string;
   exports: string;
 };
 
@@ -32,31 +33,22 @@ export type AdapterDefinition = {
   }) => Record<string, string>;
 };
 
-const sharedConfigOverrides = `const configOverrides: AgentKitConfig = {
-  payments: {
-    facilitatorUrl: process.env.PAYMENTS_FACILITATOR_URL as any,
-    payTo: process.env.PAYMENTS_RECEIVABLE_ADDRESS as \`0x\${string}\`,
-    network: process.env.PAYMENTS_NETWORK as any,
-    defaultPrice: process.env.PAYMENTS_DEFAULT_PRICE,
-  },
-};`;
-
 const adapterDefinitions: Record<string, AdapterDefinition> = {
   hono: {
     id: 'hono',
     displayName: 'Hono',
+    filesDir: join(ADAPTER_FILES_ROOT, 'hono'),
+    placeholderTargets: ['src/lib/agent.ts'],
     snippets: {
       imports: `import { createAgentApp } from "@lucid-agents/agent-kit-hono";`,
-      configOverrides: sharedConfigOverrides,
+      preSetup: ``,
       appCreation: `const { app, addEntrypoint } = createAgentApp(
   {
     name: process.env.AGENT_NAME,
     version: process.env.AGENT_VERSION,
     description: process.env.AGENT_DESCRIPTION,
   },
-  {
-    useConfigPayments: true,
-  }
+  typeof appOptions !== 'undefined' ? appOptions : {}
 );`,
       entrypointRegistration: `addEntrypoint({
   key: "echo",
@@ -72,6 +64,7 @@ const adapterDefinitions: Record<string, AdapterDefinition> = {
     };
   },
 });`,
+      postSetup: ``,
       exports: `export { app };`,
     },
   },
@@ -88,18 +81,15 @@ const adapterDefinitions: Record<string, AdapterDefinition> = {
     },
     placeholderTargets: ['src/lib/agent.ts'],
     snippets: {
-      imports: `import { createTanStackRuntime } from "@lucid-agents/agent-kit-tanstack";
-import type { CreateAgentHttpOptions } from "@lucid-agents/agent-kit";`,
-      configOverrides: sharedConfigOverrides,
+      imports: `import { createTanStackRuntime } from "@lucid-agents/agent-kit-tanstack";`,
+      preSetup: ``,
       appCreation: `const tanstack = createTanStackRuntime(
   {
     name: process.env.AGENT_NAME,
     version: process.env.AGENT_VERSION,
     description: process.env.AGENT_DESCRIPTION,
   },
-  {
-    useConfigPayments: true,
-  }
+  typeof appOptions !== 'undefined' ? appOptions : {}
 );
 
 const { runtime, handlers } = tanstack;`,
@@ -117,6 +107,7 @@ const { runtime, handlers } = tanstack;`,
     };
   },
 });`,
+      postSetup: ``,
       exports: `const { agent } = runtime;
 
 export { agent, handlers, runtime };`,

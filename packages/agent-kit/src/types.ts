@@ -1,21 +1,21 @@
-import type { ZodTypeAny } from "zod";
-import type { Network as X402Network, Resource } from "x402/types";
 import type {
   AgentContext as CoreAgentContext,
   AgentMeta as CoreAgentMeta,
   EntrypointDef as CoreEntrypointDef,
-  Network as CoreNetwork,
   PaymentsConfig as CorePaymentsConfig,
   StreamEnvelope as CoreStreamEnvelope,
   StreamPushEnvelope as CoreStreamPushEnvelope,
   StreamResult as CoreStreamResult,
   Usage as CoreUsage,
-} from "@lucid-agents/agent-core";
-import type { AP2ExtensionDescriptor, AP2Role } from "./ap2";
+} from '@lucid-agents/agent-core';
 import type {
   RegistrationEntry,
   TrustModel,
 } from '@lucid-agents/agent-kit-identity';
+import type { Network as X402Network, Resource } from 'x402/types';
+import type { ZodTypeAny } from 'zod';
+
+import type { AP2ExtensionDescriptor, AP2Role } from './ap2';
 
 export type {
   RegistrationEntry,
@@ -39,7 +39,7 @@ export type StreamResult = CoreStreamResult;
 
 export type EntrypointDef = Omit<
   CoreEntrypointDef<ZodTypeAny | undefined, ZodTypeAny | undefined>,
-  "network"
+  'network'
 > & {
   network?: X402Network;
 };
@@ -121,7 +121,10 @@ export type AgentCardWithEntrypoints = AgentCard & {
 
 export type Network = X402Network;
 
-export type PaymentsConfig = Omit<CorePaymentsConfig, "network" | "payTo" | "facilitatorUrl"> & {
+export type PaymentsConfig = Omit<
+  CorePaymentsConfig,
+  'network' | 'payTo' | 'facilitatorUrl'
+> & {
   payTo: `0x${string}` | SolanaAddress;
   facilitatorUrl: Resource;
   network: Network;

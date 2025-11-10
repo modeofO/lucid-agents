@@ -1,5 +1,6 @@
-import type { Network } from "@lucid-agents/agent-core";
-import type { EntrypointDef, PaymentsConfig } from "../types";
+import type { Network } from '@lucid-agents/agent-core';
+
+import type { EntrypointDef, PaymentsConfig } from '../types';
 
 export type PaymentRequirement =
   | { required: false }
@@ -13,7 +14,7 @@ export type PaymentRequirement =
 
 export const resolvePaymentRequirement = (
   entrypoint: EntrypointDef,
-  kind: "invoke" | "stream",
+  kind: 'invoke' | 'stream',
   payments?: PaymentsConfig
 ): PaymentRequirement => {
   if (!payments) return { required: false };
@@ -22,9 +23,9 @@ export const resolvePaymentRequirement = (
   if (!network) return { required: false };
 
   const price =
-    typeof entrypoint.price === "string"
+    typeof entrypoint.price === 'string'
       ? entrypoint.price
-      : entrypoint.price?.[kind] ?? payments.defaultPrice;
+      : (entrypoint.price?.[kind] ?? payments.defaultPrice);
 
   if (!price) return { required: false };
 
@@ -41,18 +42,18 @@ export const paymentRequiredResponse = (
   requirement: Extract<PaymentRequirement, { required: true }>
 ) => {
   const headers = new Headers({
-    "Content-Type": "application/json; charset=utf-8",
-    "X-Price": requirement.price,
-    "X-Network": requirement.network,
-    "X-Pay-To": requirement.payTo,
+    'Content-Type': 'application/json; charset=utf-8',
+    'X-Price': requirement.price,
+    'X-Network': requirement.network,
+    'X-Pay-To': requirement.payTo,
   });
   if (requirement.facilitatorUrl) {
-    headers.set("X-Facilitator", requirement.facilitatorUrl);
+    headers.set('X-Facilitator', requirement.facilitatorUrl);
   }
   return new Response(
     JSON.stringify({
       error: {
-        code: "payment_required",
+        code: 'payment_required',
         price: requirement.price,
         network: requirement.network,
         payTo: requirement.payTo,

@@ -1,24 +1,20 @@
-import {
-  HeadContent,
-  Scripts,
-  createRootRoute,
-} from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router';
+import type { ReactNode } from 'react';
 
 export const Route = createRootRoute({
   head: () => ({
     meta: [
-      { charSet: "utf-8" },
+      { charSet: 'utf-8' },
       {
-        name: "viewport",
-        content: "width=device-width, initial-scale=1",
+        name: 'viewport',
+        content: 'width=device-width, initial-scale=1',
       },
       {
-        title: "Lucid Agent API",
+        title: 'Lucid Agent API',
       },
       {
-        name: "description",
-        content: "Headless TanStack runtime for Lucid Agents",
+        name: 'description',
+        content: 'Headless TanStack runtime for Lucid Agents',
       },
     ],
   }),

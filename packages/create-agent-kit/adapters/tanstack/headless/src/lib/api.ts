@@ -19,9 +19,9 @@ export type AgentHealth = {
 };
 
 export async function getEntrypoints() {
-  const response = await fetch("/api/agent/entrypoints");
+  const response = await fetch('/api/agent/entrypoints');
   if (!response.ok) {
-    throw new Error("Unable to load entrypoints");
+    throw new Error('Unable to load entrypoints');
   }
   const payload = await response.json();
   if (Array.isArray(payload.entrypoints)) {
@@ -34,25 +34,25 @@ export async function getEntrypoints() {
 }
 
 export async function getManifest() {
-  const response = await fetch("/.well-known/agent-card.json");
+  const response = await fetch('/.well-known/agent-card.json');
   if (!response.ok) {
-    throw new Error("Unable to load manifest");
+    throw new Error('Unable to load manifest');
   }
   return response.json();
 }
 
-let paymentModulePromise: Promise<typeof import("x402-fetch") | null> | null =
+let paymentModulePromise: Promise<typeof import('x402-fetch') | null> | null =
   null;
 
 async function resolveFetcher(signer?: any) {
   if (!signer) return fetch;
 
   if (!paymentModulePromise) {
-    paymentModulePromise = import("x402-fetch")
-      .then((mod) => mod)
-      .catch((error) => {
+    paymentModulePromise = import('x402-fetch')
+      .then(mod => mod)
+      .catch(error => {
         console.warn(
-          "x402-fetch could not be loaded, falling back to plain fetch",
+          'x402-fetch could not be loaded, falling back to plain fetch',
           error
         );
         return null;
@@ -116,18 +116,18 @@ export async function invokeEntrypointWithBody({
   const fetcher = await resolveFetcher(signer);
 
   const response = await fetcher(`/api/agent/entrypoints/${key}/invoke`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body ?? {}),
   });
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.error ?? "Entrypoint invocation failed");
+    throw new Error(error.error ?? 'Entrypoint invocation failed');
   }
 
-  const contentType = response.headers.get("content-type") ?? "";
-  if (contentType.includes("application/json")) {
+  const contentType = response.headers.get('content-type') ?? '';
+  if (contentType.includes('application/json')) {
     return response.json();
   }
 
@@ -149,20 +149,20 @@ export async function streamEntrypointWithBody({
   const controller = new AbortController();
 
   const response = await fetcher(`/api/agent/entrypoints/${key}/stream`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body ?? {}),
     signal: controller.signal,
   });
 
   if (!response.ok || !response.body) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.error ?? "Entrypoint stream failed");
+    throw new Error(error.error ?? 'Entrypoint stream failed');
   }
 
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
-  let buffer = "";
+  let buffer = '';
   let closed = false;
 
   const finish = () => {
@@ -177,12 +177,12 @@ export async function streamEntrypointWithBody({
         const { done, value } = await reader.read();
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
-        const parts = buffer.split("\n\n");
-        buffer = parts.pop() ?? "";
+        const parts = buffer.split('\n\n');
+        buffer = parts.pop() ?? '';
         for (const part of parts) {
-          if (!part.startsWith("data: ")) continue;
+          if (!part.startsWith('data: ')) continue;
           const payload = part.slice(6);
-          if (payload === "[DONE]") {
+          if (payload === '[DONE]') {
             finish();
             return;
           }
@@ -190,7 +190,7 @@ export async function streamEntrypointWithBody({
             const parsed = JSON.parse(payload);
             callbacks.onChunk?.(parsed);
           } catch (error) {
-            console.warn("Failed to parse stream chunk", error);
+            console.warn('Failed to parse stream chunk', error);
           }
         }
       }
@@ -214,9 +214,9 @@ export async function streamEntrypointWithBody({
 }
 
 export async function getHealth(): Promise<AgentHealth> {
-  const response = await fetch("/api/agent/health", { cache: "no-store" });
+  const response = await fetch('/api/agent/health', { cache: 'no-store' });
   if (!response.ok) {
-    throw new Error("Unable to load agent health");
+    throw new Error('Unable to load agent health');
   }
   return response.json();
 }

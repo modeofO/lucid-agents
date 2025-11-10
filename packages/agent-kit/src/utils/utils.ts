@@ -1,9 +1,6 @@
 import { z } from 'zod';
 
-import {
-  getActiveInstanceConfig,
-  getAgentKitConfig,
-} from '../config';
+import { getActiveInstanceConfig, getAgentKitConfig } from '../config';
 import type { PaymentsConfig } from '../types';
 
 export function toJsonSchemaOrUndefined(s?: z.ZodTypeAny) {

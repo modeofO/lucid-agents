@@ -125,7 +125,10 @@ describe('create-agent-kit CLI', () => {
     const projectDir = join(cwd, 'demo-agent');
     const pkg = await readJson(join(projectDir, 'package.json'));
     const readme = await readFile(join(projectDir, 'README.md'), 'utf8');
-    const agentSrc = await readFile(join(projectDir, 'src/agent.ts'), 'utf8');
+    const agentSrc = await readFile(
+      join(projectDir, 'src/lib/agent.ts'),
+      'utf8'
+    );
     const envFile = await readFile(join(projectDir, '.env'), 'utf8');
 
     expect(pkg.name).toBe('demo-agent');
@@ -177,7 +180,10 @@ describe('create-agent-kit CLI', () => {
     });
 
     const projectDir = join(cwd, 'quote-agent');
-    const agentSrc = await readFile(join(projectDir, 'src/agent.ts'), 'utf8');
+    const agentSrc = await readFile(
+      join(projectDir, 'src/lib/agent.ts'),
+      'utf8'
+    );
     const envFile = await readFile(join(projectDir, '.env'), 'utf8');
     const readme = await readFile(join(projectDir, 'README.md'), 'utf8');
 
@@ -218,10 +224,14 @@ describe('create-agent-kit CLI', () => {
     });
 
     const projectDir = join(cwd, 'demo-agent');
-    const tanstackAgent = await readFile(join(projectDir, 'src/agent.ts'), 'utf8');
-    const pkg = (await readJson(
-      join(projectDir, 'package.json')
-    )) as Record<string, unknown>;
+    const tanstackAgent = await readFile(
+      join(projectDir, 'src/lib/agent.ts'),
+      'utf8'
+    );
+    const pkg = (await readJson(join(projectDir, 'package.json'))) as Record<
+      string,
+      unknown
+    >;
     const deps = (pkg.dependencies ?? {}) as Record<string, unknown>;
 
     expect(tanstackAgent).toContain('createTanStackRuntime');

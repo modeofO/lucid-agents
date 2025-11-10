@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useWalletClient } from "wagmi";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createFileRoute } from '@tanstack/react-router';
+import { useWalletClient } from 'wagmi';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   getHealth,
   getManifest,
@@ -8,11 +8,11 @@ import {
   streamEntrypointWithBody,
   type AgentHealth,
   type AgentPayments,
-} from "@/lib/api";
-import { WalletSummary } from "@/components/wallet-summary";
-import { getNetworkInfo } from "@/lib/network";
-import { cn } from "@/lib/utils";
-import { SchemaForm } from "@/components/schema-form";
+} from '@/lib/api';
+import { WalletSummary } from '@/components/wallet-summary';
+import { getNetworkInfo } from '@/lib/network';
+import { cn } from '@/lib/utils';
+import { SchemaForm } from '@/components/schema-form';
 
 type DashboardEntry = {
   key: string;
@@ -42,18 +42,18 @@ function ensureSerializable<T>(obj: T): T {
   }
 }
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute('/')({
   loader: async () => {
-    "use server";
-    const agentModule = await import("@/agent");
+    'use server';
+    const agentModule = await import('@/agent');
     const { agent } = agentModule;
 
     // Get manifest to extract schemas
-    const manifest = agent.resolveManifest("http://localhost", "/api/agent");
+    const manifest = agent.resolveManifest('http://localhost', '/api/agent');
     const manifestEntrypoints = manifest.entrypoints || [];
 
     const rawEntrypoints = agent.listEntrypoints();
-    const entrypoints: DashboardEntry[] = rawEntrypoints.map((entry) => {
+    const entrypoints: DashboardEntry[] = rawEntrypoints.map(entry => {
       // Find corresponding manifest entry for schema info
       const manifestEntry = manifestEntrypoints.find(
         (e: any) => e.key === entry.key
@@ -64,14 +64,18 @@ export const Route = createFileRoute("/")({
         description: entry.description ? String(entry.description) : null,
         streaming: Boolean(entry.stream),
         price:
-          typeof entry.price === "string"
+          typeof entry.price === 'string'
             ? String(entry.price)
             : entry.price
-            ? {
-                invoke: entry.price.invoke ? String(entry.price.invoke) : null,
-                stream: entry.price.stream ? String(entry.price.stream) : null,
-              }
-            : null,
+              ? {
+                  invoke: entry.price.invoke
+                    ? String(entry.price.invoke)
+                    : null,
+                  stream: entry.price.stream
+                    ? String(entry.price.stream)
+                    : null,
+                }
+              : null,
         network: entry.network ? String(entry.network) : null,
         inputSchema: manifestEntry?.input || null,
         outputSchema: manifestEntry?.output || null,
@@ -95,8 +99,8 @@ export const Route = createFileRoute("/")({
     const rawMeta = agent.config.meta;
     const meta = rawMeta
       ? {
-          name: String(rawMeta.name || ""),
-          version: String(rawMeta.version || ""),
+          name: String(rawMeta.name || ''),
+          version: String(rawMeta.version || ''),
           description: rawMeta.description ? String(rawMeta.description) : null,
         }
       : null;
@@ -108,14 +112,14 @@ export const Route = createFileRoute("/")({
 });
 
 const DEFAULT_PAYLOAD = JSON.stringify({ input: {} }, null, 2);
-const MANIFEST_PATH = "/.well-known/agent-card.json";
+const MANIFEST_PATH = '/.well-known/agent-card.json';
 
-type HealthState = "loading" | "healthy" | "error";
-type ManifestState = "idle" | "loading" | "loaded" | "error";
+type HealthState = 'loading' | 'healthy' | 'error';
+type ManifestState = 'idle' | 'loading' | 'loaded' | 'error';
 
-const EntryPriceSchema = (price: DashboardEntry["price"]) => {
+const EntryPriceSchema = (price: DashboardEntry['price']) => {
   if (!price) return undefined;
-  if (typeof price === "string") return { invoke: price, stream: price };
+  if (typeof price === 'string') return { invoke: price, stream: price };
   return {
     invoke: price.invoke ?? undefined,
     stream: price.stream ?? undefined,
@@ -131,11 +135,11 @@ const derivePriceLabel = (
 
   const invokePrice = breakdown?.invoke ?? defaultPrice;
   const streamPrice = entrypoint.streaming
-    ? breakdown?.stream ?? defaultPrice
-    : breakdown?.stream ?? undefined;
+    ? (breakdown?.stream ?? defaultPrice)
+    : (breakdown?.stream ?? undefined);
 
   if (!invokePrice && !streamPrice) {
-    return "Free";
+    return 'Free';
   }
   if (invokePrice && streamPrice && invokePrice !== streamPrice) {
     return `Invoke: ${invokePrice} · Stream: ${streamPrice}`;
@@ -166,9 +170,9 @@ type EntrypointCard = {
 
 const indentPayload = (payload: string) =>
   payload
-    .split("\n")
+    .split('\n')
     .map((line, index) => (index === 0 ? line : `  ${line}`))
-    .join("\n");
+    .join('\n');
 
 const buildEntrypointCards = (
   origin: string,
@@ -177,39 +181,39 @@ const buildEntrypointCards = (
 ): EntrypointCard[] => {
   const payloadIndented = indentPayload(DEFAULT_PAYLOAD);
 
-  return entrypoints?.map((entrypoint) => {
+  return entrypoints?.map(entrypoint => {
     const streaming = Boolean(entrypoint.streaming);
     const invokePath = `/api/agent/entrypoints/${entrypoint.key}/invoke`;
     const streamPath = streaming
       ? `/api/agent/entrypoints/${entrypoint.key}/stream`
       : undefined;
     const priceLabel = derivePriceLabel(entrypoint, payments);
-    const requiresPayment = priceLabel !== "Free";
+    const requiresPayment = priceLabel !== 'Free';
 
     const invokeCurl = [
-      "curl -s -X POST \\",
+      'curl -s -X POST \\',
       `  '${origin}${invokePath}' \\`,
       "  -H 'Content-Type: application/json' \\",
       "  -d '",
       payloadIndented,
       "  '",
-    ].join("\n");
+    ].join('\n');
 
     const streamCurl = streamPath
       ? [
-          "curl -sN -X POST \\",
+          'curl -sN -X POST \\',
           `  '${origin}${streamPath}' \\`,
           "  -H 'Content-Type: application/json' \\",
           "  -H 'Accept: text/event-stream' \\",
           "  -d '",
           payloadIndented,
           "  '",
-        ].join("\n")
+        ].join('\n')
       : undefined;
 
     return {
       key: entrypoint.key,
-      description: entrypoint.description ?? "No description provided.",
+      description: entrypoint.description ?? 'No description provided.',
       streaming,
       priceLabel,
       networkId: entrypoint.network ?? payments?.network ?? null,
@@ -227,20 +231,20 @@ const buildEntrypointCards = (
 const StatusChip = ({ state }: { state: HealthState }) => {
   const config = {
     healthy: {
-      label: "Healthy",
-      icon: "✓",
-      className: "border-emerald-500/50 bg-emerald-500/10 text-emerald-400",
+      label: 'Healthy',
+      icon: '✓',
+      className: 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400',
     },
     loading: {
-      label: "Checking",
-      icon: "●",
+      label: 'Checking',
+      icon: '●',
       className:
-        "border-amber-500/50 bg-amber-500/10 text-amber-400 animate-pulse",
+        'border-amber-500/50 bg-amber-500/10 text-amber-400 animate-pulse',
     },
     error: {
-      label: "Error",
-      icon: "✕",
-      className: "border-rose-500/50 bg-rose-500/10 text-rose-400",
+      label: 'Error',
+      icon: '✕',
+      className: 'border-rose-500/50 bg-rose-500/10 text-rose-400',
     },
   };
 
@@ -249,7 +253,7 @@ const StatusChip = ({ state }: { state: HealthState }) => {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide",
+        'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide',
         className
       )}
     >
@@ -260,8 +264,8 @@ const StatusChip = ({ state }: { state: HealthState }) => {
 };
 
 const formatResult = (value: unknown) => {
-  if (typeof value === "string") return value;
-  if (!value) return "No response body";
+  if (typeof value === 'string') return value;
+  if (!value) return 'No response body';
   try {
     return JSON.stringify(value, null, 2);
   } catch (error) {
@@ -274,17 +278,17 @@ function useCopyFeedback() {
   const copyValue = useCallback(async (value?: string) => {
     if (!value) return;
     try {
-      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(value);
-      } else if (typeof document !== "undefined") {
-        const textarea = document.createElement("textarea");
+      } else if (typeof document !== 'undefined') {
+        const textarea = document.createElement('textarea');
         textarea.value = value;
-        textarea.setAttribute("readonly", "readonly");
-        textarea.style.position = "absolute";
-        textarea.style.left = "-9999px";
+        textarea.setAttribute('readonly', 'readonly');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
         document.body.appendChild(textarea);
         textarea.select();
-        document.execCommand("copy");
+        document.execCommand('copy');
         document.body.removeChild(textarea);
       }
       setFlag(true);
@@ -304,7 +308,7 @@ type InvocationState = {
   paymentUsed: boolean;
   streamingEvents: string[];
   streamingError: string | null;
-  streamingStatus: "idle" | "streaming" | "error";
+  streamingStatus: 'idle' | 'streaming' | 'error';
 };
 
 const defaultInvocationState = (): InvocationState => ({
@@ -314,7 +318,7 @@ const defaultInvocationState = (): InvocationState => ({
   paymentUsed: false,
   streamingEvents: [],
   streamingError: null,
-  streamingStatus: "idle",
+  streamingStatus: 'idle',
 });
 
 function HomePage() {
@@ -326,7 +330,7 @@ function HomePage() {
   const { data: walletClient } = useWalletClient();
 
   const origin =
-    typeof window !== "undefined" ? window.location.origin : "http://localhost";
+    typeof window !== 'undefined' ? window.location.origin : 'http://localhost';
 
   const cards = useMemo(
     () => buildEntrypointCards(origin, entrypoints, payments),
@@ -334,13 +338,13 @@ function HomePage() {
   );
 
   const entrypointCount = cards?.length ?? 0;
-  const entrypointLabel = entrypointCount === 1 ? "Entrypoint" : "Entrypoints";
+  const entrypointLabel = entrypointCount === 1 ? 'Entrypoint' : 'Entrypoints';
 
-  const [healthState, setHealthState] = useState<HealthState>("loading");
+  const [healthState, setHealthState] = useState<HealthState>('loading');
   const [healthData, setHealthData] = useState<AgentHealth | null>(null);
-  const [manifestState, setManifestState] = useState<ManifestState>("idle");
+  const [manifestState, setManifestState] = useState<ManifestState>('idle');
   const [manifestText, setManifestText] = useState<string>(
-    "Manifest unavailable."
+    'Manifest unavailable.'
   );
 
   const [invocationStates, setInvocationStates] = useState<
@@ -360,10 +364,10 @@ function HomePage() {
         | Partial<InvocationState>
         | ((prev: InvocationState) => InvocationState)
     ) => {
-      setInvocationStates((prev) => {
+      setInvocationStates(prev => {
         const base = prev[key] ?? defaultInvocationState();
         const next =
-          typeof updates === "function"
+          typeof updates === 'function'
             ? updates(base)
             : { ...base, ...updates };
         return {
@@ -385,12 +389,12 @@ function HomePage() {
         setHealthData(health);
         const ok =
           health.ok === true ||
-          (health.status && health.status.toLowerCase().includes("ok")) ||
-          (health.status && health.status.toLowerCase().includes("healthy"));
-        setHealthState(ok ? "healthy" : "error");
+          (health.status && health.status.toLowerCase().includes('ok')) ||
+          (health.status && health.status.toLowerCase().includes('healthy'));
+        setHealthState(ok ? 'healthy' : 'error');
       } catch (error) {
         if (!cancelled) {
-          setHealthState("error");
+          setHealthState('error');
         }
       }
     };
@@ -407,22 +411,22 @@ function HomePage() {
   useEffect(() => {
     let cancelled = false;
     const fetchManifest = async () => {
-      setManifestState("loading");
+      setManifestState('loading');
       try {
         const manifest = await getManifest();
         if (cancelled) return;
         const text =
-          manifest && typeof manifest === "object"
+          manifest && typeof manifest === 'object'
             ? JSON.stringify(manifest, null, 2)
-            : typeof manifest === "string"
-            ? manifest
-            : "Manifest unavailable.";
+            : typeof manifest === 'string'
+              ? manifest
+              : 'Manifest unavailable.';
         setManifestText(text);
-        setManifestState("loaded");
+        setManifestState('loaded');
       } catch (error) {
         if (!cancelled) {
-          setManifestText("Failed to load manifest.");
-          setManifestState("error");
+          setManifestText('Failed to load manifest.');
+          setManifestState('error');
         }
       }
     };
@@ -447,7 +451,7 @@ function HomePage() {
         parsedBody = payloadInput.trim() ? JSON.parse(payloadInput) : {};
         updateEntryState(entry.key, { error: null });
       } catch (error) {
-        updateEntryState(entry.key, { error: "Payload must be valid JSON" });
+        updateEntryState(entry.key, { error: 'Payload must be valid JSON' });
         return;
       }
 
@@ -495,7 +499,7 @@ function HomePage() {
       updateEntryState(entry.key, {
         streamingEvents: [],
         streamingError: null,
-        streamingStatus: "streaming",
+        streamingStatus: 'streaming',
       });
 
       let parsedBody: unknown = {};
@@ -503,8 +507,8 @@ function HomePage() {
         parsedBody = payloadInput.trim() ? JSON.parse(payloadInput) : {};
       } catch {
         updateEntryState(entry.key, {
-          streamingStatus: "error",
-          streamingError: "Payload must be valid JSON",
+          streamingStatus: 'error',
+          streamingError: 'Payload must be valid JSON',
         });
         return;
       }
@@ -529,31 +533,31 @@ function HomePage() {
           key: entry.key,
           body: parsedBody,
           signer,
-          onChunk: (chunk) => {
-            if (chunk && typeof chunk === "object" && "kind" in chunk) {
-              if ((chunk as any).kind === "text") {
-                updateEntryState(entry.key, (prev) => ({
+          onChunk: chunk => {
+            if (chunk && typeof chunk === 'object' && 'kind' in chunk) {
+              if ((chunk as any).kind === 'text') {
+                updateEntryState(entry.key, prev => ({
                   ...prev,
                   streamingEvents: [
                     ...prev.streamingEvents,
-                    String((chunk as any).text ?? ""),
+                    String((chunk as any).text ?? ''),
                   ],
                 }));
               }
-              if ((chunk as any).kind === "run-end") {
-                updateEntryState(entry.key, { streamingStatus: "idle" });
+              if ((chunk as any).kind === 'run-end') {
+                updateEntryState(entry.key, { streamingStatus: 'idle' });
               }
             }
           },
-          onError: (error) => {
+          onError: error => {
             updateEntryState(entry.key, {
-              streamingStatus: "error",
+              streamingStatus: 'error',
               streamingError: error.message,
             });
           },
           onDone: () => {
             updateEntryState(entry.key, {
-              streamingStatus: "idle",
+              streamingStatus: 'idle',
             });
           },
         });
@@ -561,7 +565,7 @@ function HomePage() {
         streamCancelRef.current[entry.key] = cancel;
       } catch (error) {
         updateEntryState(entry.key, {
-          streamingStatus: "error",
+          streamingStatus: 'error',
           streamingError: (error as Error).message,
         });
       }
@@ -571,7 +575,7 @@ function HomePage() {
 
   useEffect(() => {
     return () => {
-      Object.values(streamCancelRef.current).forEach((cancel) => cancel?.());
+      Object.values(streamCancelRef.current).forEach(cancel => cancel?.());
     };
   }, []);
 
@@ -584,16 +588,16 @@ function HomePage() {
   const appKitSnippet = [
     'import { useWalletClient } from "wagmi";',
     'import { wrapFetchWithPayment } from "x402-fetch";',
-    "",
-    "const { data: walletClient } = useWalletClient();",
-    "",
-    "if (walletClient) {",
-    "  const fetchWithPayment = wrapFetchWithPayment(fetch, walletClient);",
-    "  // await fetchWithPayment(...)",
-    "}",
-    "",
-    "// Ensure WALLET_CONNECT_PROJECT_ID is configured to use WalletConnect.",
-  ].join("\n");
+    '',
+    'const { data: walletClient } = useWalletClient();',
+    '',
+    'if (walletClient) {',
+    '  const fetchWithPayment = wrapFetchWithPayment(fetch, walletClient);',
+    '  // await fetchWithPayment(...)',
+    '}',
+    '',
+    '// Ensure WALLET_CONNECT_PROJECT_ID is configured to use WalletConnect.',
+  ].join('\n');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 py-8 px-4 sm:px-6 lg:px-8">
@@ -606,16 +610,16 @@ function HomePage() {
               </div>
               <div>
                 <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-zinc-50 to-zinc-400 bg-clip-text text-transparent">
-                  {meta?.name ?? "Lucid Agent"}
+                  {meta?.name ?? 'Lucid Agent'}
                 </h1>
                 <p className="text-sm text-zinc-500">
-                  v{meta?.version ?? "0.0.0"}
+                  v{meta?.version ?? '0.0.0'}
                 </p>
               </div>
             </div>
             <p className="max-w-2xl text-base text-zinc-400 leading-relaxed">
               {meta?.description ??
-                "Monitor agent health, review entrypoints, and interact with invoke and streaming flows."}
+                'Monitor agent health, review entrypoints, and interact with invoke and streaming flows.'}
             </p>
           </div>
           <WalletSummary className="max-w-xl" />
@@ -639,13 +643,13 @@ function HomePage() {
                 <dt className="text-zinc-400">Status</dt>
                 <dd className="font-medium text-zinc-100">
                   {healthData?.status ??
-                    (healthState === "healthy" ? "ok" : "unknown")}
+                    (healthState === 'healthy' ? 'ok' : 'unknown')}
                 </dd>
               </div>
               <div className="flex justify-between items-center">
                 <dt className="text-zinc-400">Last Checked</dt>
                 <dd className="text-zinc-300">
-                  {healthData?.timestamp ?? "Just now"}
+                  {healthData?.timestamp ?? 'Just now'}
                 </dd>
               </div>
             </dl>
@@ -672,7 +676,7 @@ function HomePage() {
               <div className="flex justify-between items-center">
                 <dt className="text-zinc-400">Default Price</dt>
                 <dd className="font-medium text-emerald-400">
-                  {payments?.defaultPrice ?? "Free"}
+                  {payments?.defaultPrice ?? 'Free'}
                 </dd>
               </div>
             </dl>
@@ -689,7 +693,7 @@ function HomePage() {
               <div className="flex flex-col gap-1">
                 <dt className="text-zinc-400">Recipient</dt>
                 <dd className="truncate font-mono text-xs text-emerald-400 bg-zinc-800/50 px-2 py-1 rounded">
-                  {payments?.payTo ?? "—"}
+                  {payments?.payTo ?? '—'}
                 </dd>
               </div>
             </dl>
@@ -714,7 +718,7 @@ function HomePage() {
           </header>
 
           <div className="grid gap-6 xl:grid-cols-2">
-            {cards?.map((card) => {
+            {cards?.map(card => {
               const state = getEntryState(card.key);
               return (
                 <article
@@ -729,13 +733,13 @@ function HomePage() {
                         </h3>
                         <span
                           className={cn(
-                            "inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider",
+                            'inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
                             card.streaming
-                              ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
-                              : "border-blue-500/50 bg-blue-500/10 text-blue-400"
+                              ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400'
+                              : 'border-blue-500/50 bg-blue-500/10 text-blue-400'
                           )}
                         >
-                          {card.streaming ? "Stream" : "Invoke"}
+                          {card.streaming ? 'Stream' : 'Invoke'}
                         </span>
                       </div>
                       <p className="text-sm text-zinc-400 leading-relaxed">
@@ -780,7 +784,7 @@ function HomePage() {
                   <SchemaForm
                     schema={card.inputSchema}
                     value={state.payload}
-                    onChange={(value) =>
+                    onChange={value =>
                       updateEntryState(card.key, { payload: value })
                     }
                   />
@@ -838,22 +842,22 @@ function HomePage() {
                         onClick={() =>
                           handleStream(card, getEntryState(card.key).payload)
                         }
-                        disabled={state.streamingStatus === "streaming"}
+                        disabled={state.streamingStatus === 'streaming'}
                         className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-emerald-500/50 bg-emerald-500/10 px-5 py-2.5 text-sm font-semibold text-emerald-400 transition hover:border-emerald-500 hover:bg-emerald-500/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <span>⚡</span>
-                        {state.streamingStatus === "streaming"
-                          ? "Streaming..."
-                          : "Start Stream"}
+                        {state.streamingStatus === 'streaming'
+                          ? 'Streaming...'
+                          : 'Start Stream'}
                       </button>
                     )}
                     {card.streaming &&
-                      state.streamingStatus === "streaming" && (
+                      state.streamingStatus === 'streaming' && (
                         <button
                           onClick={() => {
                             streamCancelRef.current[card.key]?.();
                             updateEntryState(card.key, {
-                              streamingStatus: "idle",
+                              streamingStatus: 'idle',
                             });
                           }}
                           className="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-500/50 bg-rose-500/10 px-4 py-2.5 text-sm font-medium text-rose-400 transition hover:border-rose-500 hover:bg-rose-500/20 active:scale-95"
@@ -866,7 +870,7 @@ function HomePage() {
                       onClick={() => copyCurl(card.invokeCurl)}
                       className="ml-auto inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2.5 text-xs font-medium text-zinc-300 transition hover:border-zinc-600 hover:bg-zinc-800 hover:text-zinc-100"
                     >
-                      {curlCopied ? "✓ Copied!" : "📋 Copy cURL"}
+                      {curlCopied ? '✓ Copied!' : '📋 Copy cURL'}
                     </button>
                   </div>
 
@@ -905,7 +909,7 @@ function HomePage() {
                             <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
                               Stream Events
                             </span>
-                            {state.streamingStatus === "streaming" && (
+                            {state.streamingStatus === 'streaming' && (
                               <span className="flex h-2 w-2 items-center justify-center">
                                 <span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-emerald-400 opacity-75"></span>
                                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
@@ -914,15 +918,15 @@ function HomePage() {
                           </div>
                           <span
                             className={cn(
-                              "text-xs font-medium",
-                              state.streamingStatus === "streaming"
-                                ? "text-emerald-400"
-                                : "text-zinc-500"
+                              'text-xs font-medium',
+                              state.streamingStatus === 'streaming'
+                                ? 'text-emerald-400'
+                                : 'text-zinc-500'
                             )}
                           >
-                            {state.streamingStatus === "streaming"
-                              ? "● Live"
-                              : "○ Idle"}
+                            {state.streamingStatus === 'streaming'
+                              ? '● Live'
+                              : '○ Idle'}
                           </span>
                         </div>
                         <div className="max-h-32 overflow-y-auto rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-3">
@@ -943,7 +947,7 @@ function HomePage() {
                             </ul>
                           )}
                         </div>
-                        {state.streamingStatus === "error" &&
+                        {state.streamingStatus === 'error' &&
                           state.streamingError && (
                             <div className="flex items-start gap-2 rounded-lg border border-rose-500/40 bg-rose-500/10 p-2">
                               <span className="text-rose-400">⚠</span>
@@ -971,7 +975,7 @@ function HomePage() {
                 Agent Manifest
               </h2>
               <p className="text-sm text-zinc-500">
-                Complete agent specification served from{" "}
+                Complete agent specification served from{' '}
                 <code className="text-xs text-emerald-400">
                   {MANIFEST_PATH}
                 </code>
@@ -986,24 +990,24 @@ function HomePage() {
                   ▶
                 </span>
                 <span>View Full Manifest JSON</span>
-                {manifestState === "loading" && (
+                {manifestState === 'loading' && (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-700 border-t-emerald-400" />
                 )}
               </div>
               <button
-                onClick={(e) => {
+                onClick={e => {
                   e.preventDefault();
                   e.stopPropagation();
                   copyManifest(manifestText);
                 }}
                 className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-2 text-sm font-medium text-zinc-300 transition hover:border-zinc-600 hover:bg-zinc-800 hover:text-zinc-100"
               >
-                {manifestCopied ? "✓ Copied!" : "Copy JSON"}
+                {manifestCopied ? '✓ Copied!' : 'Copy JSON'}
               </button>
             </summary>
             <div className="border-t border-zinc-800/50 p-6">
               <pre className="max-h-[500px] overflow-auto rounded-lg border border-zinc-800/50 bg-zinc-950/80 p-4 font-mono text-xs leading-relaxed text-zinc-300 shadow-inner">
-                {manifestState === "loading" ? (
+                {manifestState === 'loading' ? (
                   <div className="flex items-center gap-2 text-zinc-500">
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-700 border-t-emerald-400" />
                     Loading manifest…
@@ -1046,7 +1050,7 @@ function HomePage() {
                   onClick={() => copyAppKitSnippet(appKitSnippet)}
                   className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-zinc-600 hover:bg-zinc-800 hover:text-zinc-100"
                 >
-                  {appKitSnippetCopied ? "✓ Copied!" : "Copy"}
+                  {appKitSnippetCopied ? '✓ Copied!' : 'Copy'}
                 </button>
               </header>
               <pre className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border border-zinc-800/50 bg-zinc-950/80 p-4 font-mono text-xs leading-relaxed text-zinc-300 shadow-inner">

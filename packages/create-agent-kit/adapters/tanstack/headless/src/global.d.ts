@@ -1,4 +1,4 @@
-import 'react'
+import 'react';
 
 declare global {
   namespace JSX {
@@ -6,11 +6,9 @@ declare global {
       'appkit-button': React.DetailedHTMLProps<
         React.HTMLAttributes<HTMLElement>,
         HTMLElement
-      >
+      >;
     }
   }
 }
 
-export {}
-
-
+export {};

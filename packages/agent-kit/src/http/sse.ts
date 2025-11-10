@@ -17,7 +17,7 @@ export type SSEStreamRunner = (
 ) => Promise<void> | void;
 
 const toDataLines = (value: string): string[] => {
-  return value.split(/\r?\n/).map((line) => line || "");
+  return value.split(/\r?\n/).map(line => line || '');
 };
 
 const buildSSEChunk = ({ event, data, id }: SSEWriteOptions): string => {
@@ -29,8 +29,8 @@ const buildSSEChunk = ({ event, data, id }: SSEWriteOptions): string => {
   for (const datum of toDataLines(data)) {
     lines.push(`data: ${datum}`);
   }
-  lines.push("");
-  return lines.join("\n");
+  lines.push('');
+  return lines.join('\n');
 };
 
 export const writeSSE = (
@@ -46,9 +46,9 @@ export const createSSEStream = (runner: SSEStreamRunner): Response => {
       const context: SSEStreamRunnerContext = {
         controller,
         close: () => controller.close(),
-        write: (options) => writeSSE(controller, options),
+        write: options => writeSSE(controller, options),
       };
-      Promise.resolve(runner(context)).catch((error) => {
+      Promise.resolve(runner(context)).catch(error => {
         controller.error(error);
       });
     },
@@ -56,10 +56,10 @@ export const createSSEStream = (runner: SSEStreamRunner): Response => {
 
   return new Response(stream, {
     headers: {
-      "Content-Type": "text/event-stream; charset=utf-8",
-      "Cache-Control": "no-cache, no-transform",
-      Connection: "keep-alive",
-      "Transfer-Encoding": "chunked",
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'Transfer-Encoding': 'chunked',
     },
   });
 };

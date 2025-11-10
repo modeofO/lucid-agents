@@ -1,4 +1,4 @@
-import { createServerFn } from "@tanstack/react-start";
+import { createServerFn } from '@tanstack/react-start';
 
 export type DashboardEntry = {
   key: string;
@@ -29,37 +29,41 @@ function serializableClone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
 
-export const loadDashboard = createServerFn("GET", async () => {
-  "use server";
+export const loadDashboard = createServerFn('GET', async () => {
+  'use server';
   // Import agent only inside the server function to avoid serialization
-  const { agent } = await import("@/agent");
+  const { agent } = await import('@/agent');
 
   // Step 1: Get entrypoints list (this might be causing issues)
   let entrypoints: DashboardEntry[] = [];
   try {
     const rawEntrypoints = agent.listEntrypoints();
 
-    entrypoints = rawEntrypoints.map<DashboardEntry>((entry) => {
+    entrypoints = rawEntrypoints.map<DashboardEntry>(entry => {
       // Explicitly extract only serializable data
       const serializable: DashboardEntry = {
         key: String(entry.key),
         description: entry.description ? String(entry.description) : null,
         streaming: Boolean(entry.stream),
         price:
-          typeof entry.price === "string"
+          typeof entry.price === 'string'
             ? String(entry.price)
             : entry.price
-            ? {
-                invoke: entry.price.invoke ? String(entry.price.invoke) : null,
-                stream: entry.price.stream ? String(entry.price.stream) : null,
-              }
-            : null,
+              ? {
+                  invoke: entry.price.invoke
+                    ? String(entry.price.invoke)
+                    : null,
+                  stream: entry.price.stream
+                    ? String(entry.price.stream)
+                    : null,
+                }
+              : null,
         network: entry.network ? String(entry.network) : null,
       };
       return serializable;
     });
   } catch (error) {
-    console.error("[loadDashboard] Error getting entrypoints:", error);
+    console.error('[loadDashboard] Error getting entrypoints:', error);
     throw error;
   }
 
@@ -81,7 +85,7 @@ export const loadDashboard = createServerFn("GET", async () => {
           }
         : null;
   } catch (error) {
-    console.error("[loadDashboard] Error getting payments:", error);
+    console.error('[loadDashboard] Error getting payments:', error);
     throw error;
   }
 
@@ -92,7 +96,7 @@ export const loadDashboard = createServerFn("GET", async () => {
     // Use JSON parse/stringify to ensure no functions leak through
     meta = rawMeta ? serializableClone(rawMeta) : null;
   } catch (error) {
-    console.error("[loadDashboard] Error getting meta:", error);
+    console.error('[loadDashboard] Error getting meta:', error);
     throw error;
   }
 

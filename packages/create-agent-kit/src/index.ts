@@ -8,9 +8,11 @@ import process, {
 } from 'node:process';
 import { createInterface } from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
+
 import {
   type AdapterDefinition,
   type AdapterOptions,
+  type AdapterSnippets,
   getAdapterDefinition,
   getAdapterDisplayName,
   getAdapterLayers,
@@ -133,8 +135,6 @@ const LUCID_BANNER = [
   '   Agent scaffolding toolkit  ',
 ];
 
-// DEFAULT_TEMPLATE_VALUES removed - use template.json defaults only
-
 const DEFAULT_PROJECT_NAME = 'agent-app';
 const PROJECT_NAME_PROMPT = 'Project directory name:';
 
@@ -176,6 +176,11 @@ export async function runCli(
     prompt,
     logger,
   });
+
+  // Validate adapter exists and is compatible with template
+  validateAdapterExists(selectedAdapter);
+  validateAdapterCompatibility(template, selectedAdapter);
+
   const adapterDefinition = getAdapterDefinition(selectedAdapter);
   const requestedVariant = parsed.options.adapterUiPreference;
   if (
@@ -240,10 +245,18 @@ export async function runCli(
     adapterDefinition,
     adapterOptions
   );
+
+  // Read template.json metadata
+  const templateJsonPath = join(template.path, 'template.json');
+  const templateJsonRaw = await fs.readFile(templateJsonPath, 'utf8');
+  const templateMeta = JSON.parse(templateJsonRaw);
+
   await applyTemplateTransforms(targetDir, {
     packageName,
     replacements,
     adapter: adapterDefinition,
+    templateRoot: template.path,
+    templateMeta,
   });
 
   await setupEnvironment({
@@ -266,7 +279,7 @@ export async function runCli(
   ].filter(Boolean);
 
   logger.log('');
-  logger.log(`✨  Created agent app in ${relativeTarget}`);
+  logger.log(`Created agent app in ${relativeTarget}`);
   logger.log('Next steps:');
   nextSteps.forEach((step, index) => {
     logger.log(`  ${index + 1}. ${step}`);
@@ -308,11 +321,7 @@ function parseArgs(args: string[]): ParsedArgs {
       i += 1;
     } else if (arg?.startsWith('--template=')) {
       options.templateId = arg.slice('--template='.length);
-    } else if (
-      arg === '--adapter' ||
-      arg === '--framework' ||
-      arg === '-a'
-    ) {
+    } else if (arg === '--adapter' || arg === '--framework' || arg === '-a') {
       const value = args[i + 1];
       if (!value) {
         throw new Error('Expected value after --adapter');
@@ -910,6 +919,169 @@ function sanitizeAnswerString(value: string): string {
   return value.replace(/\r/g, '').trim();
 }
 
+class TemplateError extends Error {
+  constructor(
+    message: string,
+    public code: string
+  ) {
+    super(message);
+    this.name = 'TemplateError';
+  }
+}
+
+type PackageJson = {
+  name?: string;
+  version?: string;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  [key: string]: unknown;
+};
+
+type TemplateMetadata = {
+  id?: string;
+  package?: {
+    dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
+  };
+  [key: string]: unknown;
+};
+
+function parseTemplateSections(content: string): Record<string, string> {
+  const markers = [
+    '{{ADAPTER_IMPORTS}}',
+    '{{ADAPTER_PRE_SETUP}}',
+    '{{ADAPTER_POST_SETUP}}',
+  ] as const;
+
+  for (const marker of markers) {
+    if (!content.includes(marker)) {
+      throw new TemplateError(
+        `Template missing required marker: ${marker}`,
+        'MISSING_MARKER'
+      );
+    }
+  }
+
+  const sections: Record<string, string> = {};
+  let currentSection = 'before-imports';
+  let currentContent: string[] = [];
+
+  for (const line of content.split('\n')) {
+    const foundMarker = markers.find(m => line.trim() === m);
+
+    if (foundMarker) {
+      sections[currentSection] = currentContent.join('\n').trim();
+      currentSection = foundMarker;
+      currentContent = [];
+    } else {
+      currentContent.push(line);
+    }
+  }
+
+  sections[currentSection] = currentContent.join('\n').trim();
+
+  return sections;
+}
+
+function mergeAdapterAndTemplate(
+  adapterSnippets: AdapterSnippets,
+  templateSections: Record<string, string>
+): string {
+  const parts: string[] = [
+    'import { z } from "zod";',
+    adapterSnippets.imports,
+    templateSections['{{ADAPTER_IMPORTS}}'] || '',
+    '',
+    adapterSnippets.preSetup,
+    templateSections['{{ADAPTER_PRE_SETUP}}'] || '',
+    '',
+    adapterSnippets.appCreation,
+    '',
+    adapterSnippets.entrypointRegistration,
+    '',
+    adapterSnippets.postSetup,
+    templateSections['{{ADAPTER_POST_SETUP}}'] || '',
+    '',
+    adapterSnippets.exports,
+  ];
+
+  return parts.filter(p => p.trim().length > 0).join('\n\n');
+}
+
+function mergePackageJson(
+  adapterPkg: PackageJson,
+  templatePkg: TemplateMetadata
+): PackageJson {
+  if (!adapterPkg || typeof adapterPkg !== 'object') {
+    throw new TemplateError(
+      'Invalid adapter package.json',
+      'INVALID_ADAPTER_PKG'
+    );
+  }
+
+  if (!templatePkg || !templatePkg.package) {
+    return adapterPkg;
+  }
+  const conflicts: string[] = [];
+  const adapterDeps = adapterPkg.dependencies || {};
+  const templateDeps = templatePkg.package.dependencies || {};
+
+  for (const [name, version] of Object.entries(templateDeps)) {
+    if (adapterDeps[name] && adapterDeps[name] !== version) {
+      conflicts.push(
+        `${name}: adapter=${adapterDeps[name]}, template=${version}`
+      );
+    }
+  }
+
+  if (conflicts.length > 0) {
+    console.warn(
+      'Dependency version conflicts detected (template version will be used):'
+    );
+    conflicts.forEach(c => console.warn(`  - ${c}`));
+  }
+
+  return {
+    ...adapterPkg,
+    dependencies: {
+      ...adapterPkg.dependencies,
+      ...templatePkg.package.dependencies,
+    },
+    devDependencies: {
+      ...adapterPkg.devDependencies,
+      ...templatePkg.package.devDependencies,
+    },
+  };
+}
+
+function validateAdapterCompatibility(
+  templateMeta: TemplateDescriptor,
+  adapterId: string
+): void {
+  if (!templateMeta.adapters || templateMeta.adapters.length === 0) {
+    return;
+  }
+
+  if (!templateMeta.adapters.includes(adapterId)) {
+    throw new TemplateError(
+      `Template "${templateMeta.id}" does not support adapter "${adapterId}". ` +
+        `Supported adapters: ${templateMeta.adapters.join(', ')}`,
+      'INCOMPATIBLE_ADAPTER'
+    );
+  }
+}
+
+function validateAdapterExists(adapterId: string): void {
+  if (!isAdapterSupported(adapterId)) {
+    const available = ['hono', 'tanstack'];
+    throw new TemplateError(
+      `Adapter "${adapterId}" does not exist. ` +
+        `Available adapters: ${available.join(', ')}`,
+      'ADAPTER_NOT_FOUND'
+    );
+  }
+}
+
 function buildTemplateReplacements(params: {
   projectDirName: string;
   packageName: string;
@@ -944,11 +1116,13 @@ function buildTemplateReplacements(params: {
     PACKAGE_NAME: packageName,
     ADAPTER_ID: adapter.id,
     ADAPTER_DISPLAY_NAME: adapter.displayName,
-    ADAPTER_VARIANT: adapterOptions?.variant ?? adapter.defaultVariant ?? 'default',
+    ADAPTER_VARIANT:
+      adapterOptions?.variant ?? adapter.defaultVariant ?? 'default',
     ADAPTER_IMPORTS: snippets.imports,
-    ADAPTER_CONFIG_OVERRIDES: snippets.configOverrides,
+    ADAPTER_PRE_SETUP: snippets.preSetup,
     ADAPTER_APP_CREATION: snippets.appCreation,
     ADAPTER_ENTRYPOINT_REGISTRATION: snippets.entrypointRegistration,
+    ADAPTER_POST_SETUP: snippets.postSetup,
     ADAPTER_EXPORTS: snippets.exports,
     ...(adapter.buildReplacements
       ? adapter.buildReplacements({
@@ -959,8 +1133,6 @@ function buildTemplateReplacements(params: {
       : {}),
   };
 }
-
-// toEntrypointKey removed - no longer needed without entrypoint customization
 
 async function assertTemplatePresent(templatePath: string) {
   const exists = existsSync(templatePath);
@@ -993,33 +1165,22 @@ async function copyTemplate(
   adapter: AdapterDefinition,
   adapterOptions: AdapterOptions
 ) {
-  // Copy base template files, excluding adapters directory
-  const entries = await fs.readdir(templateRoot, { withFileTypes: true });
-  for (const entry of entries) {
-    if (entry.name === 'adapters') continue; // Skip adapters directory
-
-    const sourcePath = join(templateRoot, entry.name);
-    const targetPath = join(targetDir, entry.name);
-
-    if (entry.isDirectory()) {
-      await fs.cp(sourcePath, targetPath, {
-        recursive: true,
-        errorOnExist: false,
-      });
-    } else {
-      await fs.copyFile(sourcePath, targetPath);
-    }
-  }
-
-  // Copy shared adapter files (framework layer)
   const adapterLayers = getAdapterLayers(adapter, adapterOptions);
   for (const layer of adapterLayers) {
     await copyAdapterLayer(layer, targetDir);
   }
 
-  // Copy template-specific overrides for this adapter
-  const overrideDir = join(templateRoot, 'adapters', adapter.id);
-  await copyAdapterLayer(overrideDir, targetDir);
+  const entries = await fs.readdir(templateRoot, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.isDirectory()) continue;
+    if (entry.name === 'agent.ts') continue;
+    if (entry.name === 'package.json' || entry.name === 'tsconfig.json')
+      continue;
+
+    const sourcePath = join(templateRoot, entry.name);
+    const targetPath = join(targetDir, entry.name);
+    await fs.copyFile(sourcePath, targetPath);
+  }
 }
 
 async function copyAdapterLayer(
@@ -1039,50 +1200,51 @@ async function copyAdapterLayer(
   }
 }
 
-const DEFAULT_PLACEHOLDER_TARGETS = ['src/agent.ts', 'src/lib/agent.ts'];
-
 async function applyTemplateTransforms(
   targetDir: string,
   params: {
     packageName: string;
     replacements: Record<string, string>;
     adapter: AdapterDefinition;
+    templateRoot: string;
+    templateMeta: TemplateMetadata;
   }
 ) {
-  await updatePackageJson(targetDir, params.packageName);
+  const packageJsonPath = join(targetDir, 'package.json');
+  const adapterPkgRaw = await fs.readFile(packageJsonPath, 'utf8');
+  const adapterPkg = JSON.parse(adapterPkgRaw) as PackageJson;
+  const mergedPkg = mergePackageJson(adapterPkg, params.templateMeta);
+  mergedPkg.name = params.packageName;
+  await fs.writeFile(
+    packageJsonPath,
+    `${JSON.stringify(mergedPkg, null, 2)}\n`,
+    'utf8'
+  );
 
-  // Replace tokens in README.md
+  const templateAgentPath = join(params.templateRoot, 'agent.ts');
+  const templateAgentExists = existsSync(templateAgentPath);
+
+  if (templateAgentExists) {
+    const templateAgentContent = await fs.readFile(templateAgentPath, 'utf8');
+    const templateSections = parseTemplateSections(templateAgentContent);
+    const mergedAgentContent = mergeAdapterAndTemplate(
+      params.adapter.snippets,
+      templateSections
+    );
+
+    const agentTargetPath = params.adapter.placeholderTargets?.[0]
+      ? join(targetDir, params.adapter.placeholderTargets[0])
+      : join(targetDir, 'src/lib/agent.ts');
+
+    await fs.writeFile(agentTargetPath, mergedAgentContent, 'utf8');
+  }
+
   await replaceTemplatePlaceholders(
     join(targetDir, 'README.md'),
     params.replacements
   );
 
-  // Replace adapter-specific code in agent files (base locations + adapter overrides)
-  const placeholderTargets = new Set<string>();
-  for (const target of DEFAULT_PLACEHOLDER_TARGETS) {
-    placeholderTargets.add(join(targetDir, target));
-  }
-  for (const target of params.adapter.placeholderTargets ?? []) {
-    placeholderTargets.add(join(targetDir, target));
-  }
-
-  for (const filePath of placeholderTargets) {
-    await replaceTemplatePlaceholders(filePath, params.replacements);
-  }
-
   await removeTemplateArtifacts(targetDir);
-}
-
-async function updatePackageJson(targetDir: string, packageName: string) {
-  const packageJsonPath = join(targetDir, 'package.json');
-  const packageJsonRaw = await fs.readFile(packageJsonPath, 'utf8');
-  const packageJson = JSON.parse(packageJsonRaw) as Record<string, unknown>;
-  packageJson.name = packageName;
-  await fs.writeFile(
-    packageJsonPath,
-    `${JSON.stringify(packageJson, null, 2)}\n`,
-    'utf8'
-  );
 }
 
 async function replaceTemplatePlaceholders(
@@ -1118,7 +1280,7 @@ async function setupEnvironment(params: {
   agentName: string;
   template: TemplateDescriptor;
 }) {
-  const { targetDir, skipWizard, wizardAnswers, agentName, template } = params;
+  const { targetDir, wizardAnswers, agentName, template } = params;
   const envPath = join(targetDir, '.env');
 
   const lines = [`AGENT_NAME=${agentName}`];
@@ -1157,9 +1319,9 @@ async function runInstall(cwd: string, logger: RunLogger) {
         }
       });
     });
-  } catch (error) {
+  } catch {
     logger.warn(
-      '⚠️  Failed to run `bun install`. Please install dependencies manually.'
+      'Failed to run `bun install`. Please install dependencies manually.'
     );
   }
 }

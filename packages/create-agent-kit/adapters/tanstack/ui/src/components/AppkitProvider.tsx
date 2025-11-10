@@ -1,16 +1,16 @@
-import { createAppKit } from "@reown/appkit/react";
+import { createAppKit } from '@reown/appkit/react';
 
-import { WagmiProvider, cookieStorage, createStorage } from "wagmi";
+import { WagmiProvider, cookieStorage, createStorage } from 'wagmi';
 import {
   base,
   baseSepolia,
   solana,
   solanaDevnet,
   type AppKitNetwork,
-} from "@reown/appkit/networks";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { SolanaAdapter } from "@reown/appkit-adapter-solana";
+} from '@reown/appkit/networks';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
+import { SolanaAdapter } from '@reown/appkit-adapter-solana';
 
 // 0. Setup queryClient
 const queryClient = new QueryClient();
@@ -24,15 +24,15 @@ const projectId =
 if (!projectId) {
   // eslint-disable-next-line no-console
   console.error(
-    "Missing VITE_PROJECT_ID (or VITE_WALLET_CONNECT_PROJECT_ID). Set it in your .env file."
+    'Missing VITE_PROJECT_ID (or VITE_WALLET_CONNECT_PROJECT_ID). Set it in your .env file.'
   );
 }
 
 // 2. Create a metadata object - optional
 const metadata = {
-  name: "Lucid Agent Platform",
-  description: "Full-stack agent platform with x402 micropayments",
-  url: typeof window !== "undefined" ? window.location.origin : "",
+  name: 'Lucid Agent Platform',
+  description: 'Full-stack agent platform with x402 micropayments',
+  url: typeof window !== 'undefined' ? window.location.origin : '',
   icons: [],
 };
 
@@ -47,7 +47,7 @@ const networks: [AppKitNetwork, ...AppKitNetwork[]] = [
 // 4. Create Wagmi Adapter
 const wagmiAdapter = new WagmiAdapter({
   networks,
-  projectId: projectId ?? "",
+  projectId: projectId ?? '',
   ssr: true,
   storage: createStorage({ storage: cookieStorage }),
 });
@@ -75,5 +75,3 @@ export function AppKitProvider({ children }: { children: React.ReactNode }) {
     </WagmiProvider>
   );
 }
-
-

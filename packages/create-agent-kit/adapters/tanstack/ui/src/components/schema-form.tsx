@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
+import { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
 
 type JSONSchema = {
   type?: string;
@@ -23,19 +23,19 @@ type SchemaFormProps = {
 };
 
 function getDefaultValue(schema: JSONSchema): any {
-  if (!schema.type) return "";
+  if (!schema.type) return '';
 
   switch (schema.type) {
-    case "string":
-      return "";
-    case "number":
-    case "integer":
+    case 'string':
+      return '';
+    case 'number':
+    case 'integer':
       return schema.minimum ?? 0;
-    case "boolean":
+    case 'boolean':
       return false;
-    case "array":
+    case 'array':
       return [];
-    case "object":
+    case 'object':
       if (schema.properties) {
         const obj: Record<string, any> = {};
         Object.entries(schema.properties).forEach(([key, propSchema]) => {
@@ -45,7 +45,7 @@ function getDefaultValue(schema: JSONSchema): any {
       }
       return {};
     default:
-      return "";
+      return '';
   }
 }
 
@@ -61,17 +61,17 @@ function renderField(
 
   const renderInput = () => {
     switch (schema.type) {
-      case "string":
+      case 'string':
         if (schema.enum) {
           return (
             <select
               id={fieldId}
-              value={value || ""}
-              onChange={(e) => onChange(e.target.value)}
+              value={value || ''}
+              onChange={e => onChange(e.target.value)}
               className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-500/40"
             >
               <option value="">Select...</option>
-              {schema.enum.map((option) => (
+              {schema.enum.map(option => (
                 <option key={String(option)} value={String(option)}>
                   {String(option)}
                 </option>
@@ -83,8 +83,8 @@ function renderField(
           <input
             id={fieldId}
             type="text"
-            value={value || ""}
-            onChange={(e) => onChange(e.target.value)}
+            value={value || ''}
+            onChange={e => onChange(e.target.value)}
             placeholder={description}
             minLength={schema.minLength}
             maxLength={schema.maxLength}
@@ -94,43 +94,41 @@ function renderField(
           />
         );
 
-      case "number":
-      case "integer":
+      case 'number':
+      case 'integer':
         return (
           <input
             id={fieldId}
             type="number"
-            value={value ?? ""}
-            onChange={(e) =>
-              onChange(
-                e.target.value === "" ? null : Number(e.target.value)
-              )
+            value={value ?? ''}
+            onChange={e =>
+              onChange(e.target.value === '' ? null : Number(e.target.value))
             }
             min={schema.minimum}
             max={schema.maximum}
-            step={schema.type === "integer" ? 1 : "any"}
+            step={schema.type === 'integer' ? 1 : 'any'}
             required={required}
             className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-500/40"
           />
         );
 
-      case "boolean":
+      case 'boolean':
         return (
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               id={fieldId}
               type="checkbox"
               checked={!!value}
-              onChange={(e) => onChange(e.target.checked)}
+              onChange={e => onChange(e.target.checked)}
               className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-emerald-500 focus:ring-2 focus:ring-emerald-500/40"
             />
             <span className="text-sm text-zinc-300">
-              {description || "Enable"}
+              {description || 'Enable'}
             </span>
           </label>
         );
 
-      case "array":
+      case 'array':
         return (
           <div className="space-y-2">
             <div className="text-xs text-zinc-400">
@@ -138,7 +136,7 @@ function renderField(
             </div>
             <textarea
               value={JSON.stringify(value || [], null, 2)}
-              onChange={(e) => {
+              onChange={e => {
                 try {
                   onChange(JSON.parse(e.target.value));
                 } catch {
@@ -156,8 +154,8 @@ function renderField(
           <input
             id={fieldId}
             type="text"
-            value={value || ""}
-            onChange={(e) => onChange(e.target.value)}
+            value={value || ''}
+            onChange={e => onChange(e.target.value)}
             className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-500/40"
           />
         );
@@ -166,11 +164,14 @@ function renderField(
 
   return (
     <div key={name} className="space-y-1.5">
-      <label htmlFor={fieldId} className="block text-sm font-medium text-zinc-300">
+      <label
+        htmlFor={fieldId}
+        className="block text-sm font-medium text-zinc-300"
+      >
         {name}
         {required && <span className="ml-1 text-rose-400">*</span>}
       </label>
-      {description && schema.type !== "boolean" && (
+      {description && schema.type !== 'boolean' && (
         <p className="text-xs text-zinc-500">{description}</p>
       )}
       {renderInput()}
@@ -178,7 +179,12 @@ function renderField(
   );
 }
 
-export function SchemaForm({ schema, value, onChange, className }: SchemaFormProps) {
+export function SchemaForm({
+  schema,
+  value,
+  onChange,
+  className,
+}: SchemaFormProps) {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [isManualMode, setIsManualMode] = useState(false);
 
@@ -188,7 +194,7 @@ export function SchemaForm({ schema, value, onChange, className }: SchemaFormPro
 
     try {
       const parsed = JSON.parse(value);
-      if (parsed.input && typeof parsed.input === "object") {
+      if (parsed.input && typeof parsed.input === 'object') {
         setFormData(parsed.input);
       } else {
         // Initialize with default values
@@ -217,13 +223,13 @@ export function SchemaForm({ schema, value, onChange, className }: SchemaFormPro
 
   if (!schema || !schema.properties) {
     return (
-      <div className={cn("space-y-2", className)}>
+      <div className={cn('space-y-2', className)}>
         <label className="block text-sm font-medium text-zinc-300">
           JSON Payload
         </label>
         <textarea
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={e => onChange(e.target.value)}
           className="h-32 w-full rounded-xl border border-zinc-800 bg-black/50 px-3 py-2 font-mono text-sm text-zinc-200 outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-500/40"
         />
       </div>
@@ -234,7 +240,7 @@ export function SchemaForm({ schema, value, onChange, className }: SchemaFormPro
   const properties = schema.properties;
 
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn('space-y-3', className)}>
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium text-zinc-300">
           Input Parameters
@@ -244,14 +250,14 @@ export function SchemaForm({ schema, value, onChange, className }: SchemaFormPro
           onClick={() => setIsManualMode(!isManualMode)}
           className="text-xs text-zinc-400 hover:text-zinc-200 transition"
         >
-          {isManualMode ? "Use Form" : "Edit JSON"}
+          {isManualMode ? 'Use Form' : 'Edit JSON'}
         </button>
       </div>
 
       {isManualMode ? (
         <textarea
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={e => onChange(e.target.value)}
           className="h-48 w-full rounded-xl border border-zinc-800 bg-black/50 px-3 py-2 font-mono text-sm text-zinc-200 outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-500/40"
         />
       ) : (
@@ -261,7 +267,7 @@ export function SchemaForm({ schema, value, onChange, className }: SchemaFormPro
               name,
               propSchema,
               formData[name],
-              (newValue) => setFormData({ ...formData, [name]: newValue }),
+              newValue => setFormData({ ...formData, [name]: newValue }),
               required.includes(name)
             )
           )}

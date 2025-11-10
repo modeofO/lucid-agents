@@ -3,6 +3,9 @@
   "name": "Blank Bun Agent",
   "description": "Start from a minimal Bun HTTP agent with @lucid-dreams/agent-kit wired up.",
   "adapters": ["hono", "tanstack"],
+  "package": {
+    "dependencies": {}
+  },
   "wizard": {
     "prompts": [
       {

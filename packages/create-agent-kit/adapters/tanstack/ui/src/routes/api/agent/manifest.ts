@@ -1,10 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from '@tanstack/react-router';
 
-export const Route = createFileRoute("/api/agent/manifest")({
+export const Route = createFileRoute('/api/agent/manifest')({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const { handlers } = await import("@/agent");
+        const { handlers } = await import('@/agent');
         return handlers.manifest({ request });
       },
     },
