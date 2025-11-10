@@ -35,9 +35,8 @@
         "base-sepolia",
         "ethereum",
         "sepolia",
-        "solana-mainnet",
-        "solana-devnet",
-        "solana-testnet"
+        "solana",
+        "solana-devnet"
       ]
     },
     "PAYMENTS_RECEIVABLE_ADDRESS": {

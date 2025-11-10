@@ -100,7 +100,7 @@ Options:
   --no-install          Skip bun install (default)
   --wizard=no           Skip wizard, use template defaults
   --non-interactive     Same as --wizard=no
-  --network=<network>   Set payment network (base-sepolia, base, solana-devnet, solana-mainnet)
+  --network=<network>   Set payment network (base-sepolia, base, solana-devnet, solana)
   --KEY=value           Pass template argument (use with --non-interactive)
   -h, --help            Show this help
 ```
@@ -121,7 +121,7 @@ bunx @lucid-agents/create-agent-kit@latest my-agent --network=solana-devnet
 bunx @lucid-agents/create-agent-kit@latest my-agent --network=base
 
 # Identity template with Solana payments
-bunx @lucid-agents/create-agent-kit@latest my-agent --template=identity --network=solana-mainnet
+bunx @lucid-agents/create-agent-kit@latest my-agent --template=identity --network=solana
 
 # With Hono adapter
 bunx @lucid-agents/create-agent-kit@latest my-agent --adapter=hono --template=blank

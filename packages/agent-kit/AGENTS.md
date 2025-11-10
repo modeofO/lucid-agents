@@ -271,9 +271,8 @@ Required env for `paymentsFromEnv`:
 
 **Solana Networks:**
 
-- `solana-mainnet` - Solana mainnet
+- `solana` - Solana mainnet
 - `solana-devnet` - Solana devnet
-- `solana-testnet` - Solana testnet
 
 ### Solana Payment Configuration
 

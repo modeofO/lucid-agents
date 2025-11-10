@@ -337,7 +337,7 @@ function printHelp(logger: RunLogger) {
   logger.log('  --wizard=no           Skip wizard, use template defaults');
   logger.log('  --non-interactive     Same as --wizard=no');
   logger.log(
-    '  --network=<network>   Set payment network (base-sepolia, base, solana-devnet, solana-mainnet)'
+    '  --network=<network>   Set payment network (base-sepolia, base, solana-devnet, solana)'
   );
   logger.log(
     '  --KEY=value           Pass template argument (use with --non-interactive)'
