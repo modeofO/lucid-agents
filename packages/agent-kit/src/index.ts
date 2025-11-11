@@ -1,4 +1,42 @@
-export * from './ap2';
+// Core types and functions
+export {
+  type AgentConfig,
+  AgentCore,
+  createAgentCore,
+  type InvokeContext,
+  type InvokeResult,
+  type StreamContext,
+  ZodValidationError,
+} from './core/agent';
+export type { Network, StreamEnvelope, StreamPushEnvelope } from './core/types';
+
+// Re-export from agent-kit-payments
+export type {
+  AgentContext,
+  AgentMeta,
+  EntrypointDef,
+  EntrypointHandler,
+  EntrypointPrice,
+  EntrypointStreamHandler,
+  PaymentsConfig,
+  SolanaAddress,
+  StreamResult,
+  Usage,
+} from '@lucid-agents/agent-kit-payments';
+export {
+  createRuntimePaymentContext,
+  paymentRequiredResponse,
+  type PaymentRequirement,
+  paymentsFromEnv,
+  resolveEntrypointPrice,
+  resolvePaymentRequirement,
+  type RuntimePaymentContext,
+  type RuntimePaymentLogger,
+  type RuntimePaymentOptions,
+  validatePaymentsConfig,
+} from '@lucid-agents/agent-kit-payments';
+
+// Config management
 export {
   type AgentKitConfig,
   configureAgentKit,
@@ -7,13 +45,9 @@ export {
   resetAgentKitConfigForTesting,
   type ResolvedAgentKitConfig,
   setActiveInstanceConfig,
-} from './config';
-export * from './erc8004';
-export {
-  paymentRequiredResponse,
-  type PaymentRequirement,
-  resolvePaymentRequirement,
-} from './http/payments';
+} from './config/config';
+
+// HTTP runtime
 export {
   type AgentHttpHandlers,
   type AgentHttpRuntime,
@@ -28,19 +62,24 @@ export {
   type SSEWriteOptions,
   writeSSE,
 } from './http/sse';
-export { buildManifest } from './manifest';
-export { resolveEntrypointPrice } from './pricing';
-export {
-  createRuntimePaymentContext,
-  type RuntimePaymentContext,
-  type RuntimePaymentLogger,
-  type RuntimePaymentOptions,
-} from './runtime';
-export * from './types';
-export * from './utils';
+
+// Manifest and A2A types
+export * from './manifest/ap2';
+export { buildManifest } from './manifest/manifest';
+export type {
+  AgentCapabilities,
+  AgentCard,
+  AgentCardWithEntrypoints,
+  AP2Config,
+  Manifest,
+  PaymentMethod,
+} from './manifest/types';
+
+// Utilities
 export {
   type AxLLMClient,
   type AxLLMClientOptions,
   createAxLLMClient,
-} from './utils/axllm';
-export { validatePaymentsConfig } from './validation';
+} from './axllm';
+export * from './utils';
+export { validateAgentMetadata } from './validation';

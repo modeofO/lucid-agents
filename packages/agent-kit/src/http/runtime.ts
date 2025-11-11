@@ -2,37 +2,38 @@ import { Buffer } from 'node:buffer';
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
+import type { TrustConfig } from '@lucid-agents/agent-kit-identity';
+import type {
+  AgentMeta,
+  EntrypointDef,
+  PaymentRequirement,
+  PaymentsConfig,
+  StreamResult,
+} from '@lucid-agents/agent-kit-payments';
 import {
-  type AgentCore,
-  createAgentCore,
-  ZodValidationError,
-} from '@lucid-agents/agent-core';
+  paymentRequiredResponse,
+  resolvePaymentRequirement,
+} from '@lucid-agents/agent-kit-payments';
 
 import {
   type AgentKitConfig,
   getAgentKitConfig,
   type ResolvedAgentKitConfig,
   setActiveInstanceConfig,
-} from '../config';
-import { buildManifest } from '../manifest';
+} from '../config/config';
+import {
+  type AgentCore,
+  createAgentCore,
+  ZodValidationError,
+} from '../core/agent';
 import type {
-  AgentCardWithEntrypoints,
-  AgentMeta,
-  AP2Config,
-  EntrypointDef,
   Network,
-  PaymentsConfig,
   StreamEnvelope,
   StreamPushEnvelope,
-  StreamResult,
-  TrustConfig,
-} from '../types';
+} from '../core/types';
+import { buildManifest } from '../manifest/manifest';
+import type { AgentCardWithEntrypoints, AP2Config } from '../manifest/types';
 import { renderLandingPage } from '../ui/landing-page';
-import {
-  paymentRequiredResponse,
-  type PaymentRequirement,
-  resolvePaymentRequirement,
-} from './payments';
 import { createSSEStream, type SSEStreamRunnerContext } from './sse';
 
 export type CreateAgentHttpOptions = {

@@ -1,6 +1,5 @@
-import type { Network } from '@lucid-agents/agent-core';
-
-import type { EntrypointDef, PaymentsConfig } from '../types';
+import type { Network } from 'x402/types';
+import type { EntrypointDef, PaymentsConfig } from './types';
 
 export type PaymentRequirement =
   | { required: false }

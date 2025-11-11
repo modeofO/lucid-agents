@@ -1,10 +1,15 @@
 import type { Hono } from 'hono';
 import { paymentMiddleware } from 'x402-hono';
 import type { FacilitatorConfig } from 'x402/types';
-import type { EntrypointDef, PaymentsConfig } from '@lucid-agents/agent-kit';
-import { resolveEntrypointPrice } from '@lucid-agents/agent-kit';
 import { toJsonSchemaOrUndefined } from './utils';
-import { validatePaymentsConfig } from '@lucid-agents/agent-kit';
+import type {
+  EntrypointDef,
+  PaymentsConfig,
+} from '@lucid-agents/agent-kit-payments';
+import {
+  resolveEntrypointPrice,
+  validatePaymentsConfig,
+} from '@lucid-agents/agent-kit-payments';
 
 type PaymentMiddlewareFactory = typeof paymentMiddleware;
 
