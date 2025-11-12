@@ -45,12 +45,20 @@ import type { PaymentsConfig } from '@lucid-agents/agent-kit-payments';
 
 ## Architectural Changes
 
-### Files Deleted from agent-kit
+### agent-core Consolidated into agent-kit
 
-- `src/types.ts` - Central types file deleted; types now co-located with features
-- `src/http/payments.ts` - Payment requirement logic moved to agent-kit-payments
-- `src/runtime.ts` - Runtime payment context moved to agent-kit-payments
-- `src/utils/axllm.ts` - Moved to `src/axllm/index.ts`
+The `@lucid-agents/agent-core` package has been merged into `agent-kit`. All functionality is preserved.
+
+### agent-kit Reorganized into Feature Folders
+
+**New structure:**
+- `core/` - Core agent types and execution
+- `http/` - HTTP runtime, handlers, SSE, types
+- `config/` - Configuration management
+- `manifest/` - Manifest generation, A2A
+- `crypto/` - Crypto utilities
+- `ui/` - Landing page
+- `validation.ts` - Validation utilities
 
 ### Package Boundaries Clarified
 
@@ -72,31 +80,9 @@ import type { PaymentsConfig } from '@lucid-agents/agent-kit-payments';
 - UI landing page
 - Crypto utilities (sanitizeAddress)
 
-### AxLLM Reorganization
-
-- Moved from `src/utils/axllm.ts` to `src/axllm/index.ts`
-- Rationale: Isolated for future extraction into separate package
-- Updated package.json exports: `./axllm` instead of `./utils/axllm`
-
 ## Migration Guide
 
-### For Package Consumers
-
-`EntrypointDef` remains in `agent-kit`, so existing imports continue to work:
-
-```typescript
-// EntrypointDef stays in agent-kit
-import type { EntrypointDef } from '@lucid-agents/agent-kit';
-
-// Payment configuration from agent-kit-payments
-import type { PaymentsConfig } from '@lucid-agents/agent-kit-payments';
-```
-
-### For Package Contributors
-
-- Types are now co-located with features (no central types file)
-- Payment logic belongs in `agent-kit-payments`
-- agent-kit-payments must build before agent-kit
+**No migration needed.** All public APIs remain unchanged. This is an internal refactoring to improve code organization.
 
 ## Bug Fixes
 
