@@ -17,7 +17,7 @@ graph TB
     subgraph "Layer 2: Core"
         core["@lucid-agents/agent-kit<br/>Core runtime & types"]
     end
-    
+
     subgraph "Layer 3: Adapters"
         hono["@lucid-agents/agent-kit-hono<br/>Hono framework adapter"]
         tanstack["@lucid-agents/agent-kit-tanstack<br/>TanStack Start adapter"]
@@ -31,11 +31,11 @@ graph TB
 
     core --> identity
     core --> payments
-    
+
     hono --> core
     tanstack --> core
     express -.-> core
-    
+
     cli --> hono
     cli --> tanstack
     cli --> templates

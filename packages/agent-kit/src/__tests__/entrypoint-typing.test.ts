@@ -24,12 +24,8 @@ describe('EntrypointDef type inference', () => {
       description: 'Chat endpoint',
       input: inputSchema,
       handler: async ({ input }) => {
-        // BUG: Currently input is 'unknown' even though we have a schema
-        // Expected: input should be { message: string; count?: number }
-
-        // This should work without type assertion:
-        const messageLength = input.message.length; // Should not error
-        const countValue = input.count ?? 0; // Should not error
+        const messageLength = input.message.length;
+        const countValue = input.count ?? 0;
 
         return {
           output: {
