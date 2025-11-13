@@ -4,9 +4,10 @@
   "commit": false,
   "fixed": [
     [
-      "@lucid-agents/agent-kit",
-      "@lucid-agents/agent-kit-identity",
-      "@lucid-agents/create-agent-kit"
+      "@lucid-agents/core",
+      "@lucid-agents/identity",
+      "@lucid-agents/payments",
+      "@lucid-agents/cli"
     ]
   ],
   "linked": [],
