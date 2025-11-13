@@ -346,7 +346,7 @@ Note: While the CLI works with Node/npx, generated projects require Bun.
 ## Related Packages
 
 - [`@lucid-agents/core`](../core/README.md) - Core agent runtime
-- [`@lucid-agents/identity`](../@lucid-agents/identity/README.md) - ERC-8004 identity
+- [`@lucid-agents/identity`](../identity/README.md) - ERC-8004 identity
 
 ## Contributing
 
