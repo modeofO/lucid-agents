@@ -37,6 +37,7 @@ agent-kit-identity (ERC-8004 integration)
 The framework supports multiple runtime adapters:
 
 - **Hono** (`@lucid-agents/agent-kit-hono`) - Traditional HTTP server
+- **Express** (`@lucid-agents/agent-kit-express`) - Node.js/Express server with x402 middleware
 - **TanStack Start UI** (`@lucid-agents/agent-kit-tanstack`) - Full-stack React with dashboard
 - **TanStack Start Headless** - API-only variant
 
@@ -47,7 +48,7 @@ Templates are adapter-agnostic and work with any compatible adapter.
 ```
 HTTP Request
     ↓
-Adapter Router (Hono or TanStack)
+Adapter Router (Hono, Express, or TanStack)
     ↓
 x402 Paywall Middleware (if configured)
     ↓
@@ -116,6 +117,12 @@ The framework supports payment receiving on multiple blockchain networks:
 │   │   │   └── paywall.ts        # x402 Hono middleware
 │   │   └── examples/
 │   │
+│   ├── agent-kit-express/  # Express adapter
+│   │   ├── src/
+│   │   │   ├── app.ts            # createAgentApp() for Express
+│   │   │   └── paywall.ts        # x402 Express middleware
+│   │   └── __tests__/            # Adapter smoke tests
+│   │
 │   ├── agent-kit-tanstack/ # TanStack adapter
 │   │   ├── src/
 │   │   │   ├── runtime.ts        # createTanStackRuntime()
@@ -135,6 +142,7 @@ The framework supports payment receiving on multiple blockchain networks:
 │       │   └── adapters.ts       # Adapter definitions
 │       ├── adapters/             # Runtime frameworks
 │       │   ├── hono/             # Hono base files
+│       │   ├── express/          # Express base files
 │       │   └── tanstack/         # TanStack base files
 │       │       ├── ui/           # Full UI variant
 │       │       └── headless/     # API-only variant
@@ -225,6 +233,26 @@ const { app, addEntrypoint } = createAgentApp(
     },
   }
 );
+```
+
+### Express Adapter
+
+**createAgentApp(meta, options?)**
+
+```typescript
+import { createAgentApp } from '@lucid-agents/agent-kit-express';
+
+const { app, addEntrypoint } = createAgentApp(
+  {
+    name: 'my-agent',
+    version: '0.1.0',
+    description: 'Agent description',
+  },
+  typeof appOptions !== 'undefined' ? appOptions : {}
+);
+
+// Express apps need to listen on a port
+const server = app.listen(process.env.PORT ?? 3000);
 ```
 
 ### TanStack Adapter
@@ -323,6 +351,9 @@ bunx @lucid-agents/create-agent-kit my-agent
 ```bash
 # Hono adapter (traditional HTTP server)
 bunx @lucid-agents/create-agent-kit my-agent --adapter=hono
+
+# Express adapter (Node-style HTTP server)
+bunx @lucid-agents/create-agent-kit my-agent --adapter=express
 
 # TanStack UI (full dashboard)
 bunx @lucid-agents/create-agent-kit my-agent --adapter=tanstack-ui
@@ -686,9 +717,17 @@ Check:
 
 ## Key Files and Their Purposes
 
-### packages/agent-kit/src/app.ts
+### packages/agent-kit/src/http/runtime.ts
 
-Main agent app creation logic. Contains `createAgentApp()` which sets up Hono routes, middleware, and entrypoint registration.
+Core HTTP runtime that adapters wrap. Handles manifest building, entrypoint registry, streaming helpers, and payment evaluation.
+
+### packages/agent-kit-hono/src/app.ts
+
+Hono-specific `createAgentApp()` implementation. Wires Fetch handlers to Hono routes and installs the x402 middleware.
+
+### packages/agent-kit-express/src/app.ts
+
+Express-specific `createAgentApp()` implementation. Bridges Node requests/responses to the Fetch-based runtime and installs the x402 Express middleware.
 
 ### packages/agent-kit/src/manifest.ts
 
@@ -720,6 +759,7 @@ CLI implementation. Handles argument parsing, wizard prompts, template copying, 
 - [agents.md](https://agents.md/) - AGENTS.md standard documentation
 - [ERC-8004 Specification](https://eips.ethereum.org/EIPS/eip-8004)
 - [Hono Documentation](https://hono.dev/)
+- [Express Documentation](https://expressjs.com/)
 - [Bun Documentation](https://bun.sh/docs)
 - [x402 Protocol](https://github.com/paywithx402)
 

@@ -9,6 +9,7 @@
       "typescript": "^5.9.2",
       "@ax-llm/ax": "^14.0.31",
       "hono": "4.10.1",
+      "express": "^4.19.2",
       "viem": "latest",
       "x402": "latest",
       "x402-fetch": "latest",

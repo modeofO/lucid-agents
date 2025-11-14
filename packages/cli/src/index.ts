@@ -330,7 +330,7 @@ function printHelp(logger: RunLogger) {
     '  -t, --template <id>   Select template (blank, axllm, axllm-flow, identity)'
   );
   logger.log(
-    '  -a, --adapter <id>    Select runtime adapter (hono, tanstack-ui, tanstack-headless)'
+    '  -a, --adapter <id>    Select runtime adapter (hono, express, tanstack-ui, tanstack-headless, next)'
   );
   logger.log('  -i, --install         Run bun install after scaffolding');
   logger.log('  --no-install          Skip bun install');
@@ -375,7 +375,7 @@ async function loadTemplates(
     let title = toTitleCase(id);
     let description: string | undefined;
     let wizard: WizardConfig | undefined;
-    let adapters: string[] = ['hono'];
+    let adapters: string[] = ['hono', 'express'];
 
     try {
       const raw = await fs.readFile(metaPath, 'utf8');
@@ -398,7 +398,7 @@ async function loadTemplates(
 
     adapters = Array.from(new Set(adapters));
     if (adapters.length === 0) {
-      adapters = ['hono'];
+      adapters = ['hono', 'express'];
     }
 
     descriptors.push({
@@ -1016,7 +1016,13 @@ function validateAdapterCompatibility(
 
 function validateAdapterExists(adapterId: string): void {
   if (!isAdapterSupported(adapterId)) {
-    const available = ['hono', 'tanstack'];
+    const available = [
+      'hono',
+      'express',
+      'tanstack-ui',
+      'tanstack-headless',
+      'next',
+    ];
     throw new TemplateError(
       `Adapter "${adapterId}" does not exist. ` +
         `Available adapters: ${available.join(', ')}`,

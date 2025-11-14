@@ -60,6 +60,40 @@ const adapterDefinitions: Record<string, AdapterDefinition> = {
       exports: `export { app };`,
     },
   },
+  express: {
+    id: 'express',
+    displayName: 'Express',
+    filesDir: join(ADAPTER_FILES_ROOT, 'express'),
+    placeholderTargets: ['src/lib/agent.ts.template'],
+    snippets: {
+      imports: `import { createAgentApp } from "@lucid-agents/express";`,
+      preSetup: ``,
+      appCreation: `const { app, addEntrypoint } = createAgentApp(
+  {
+    name: process.env.AGENT_NAME,
+    version: process.env.AGENT_VERSION,
+    description: process.env.AGENT_DESCRIPTION,
+  },
+  typeof appOptions !== 'undefined' ? appOptions : {}
+);`,
+      entrypointRegistration: `addEntrypoint({
+  key: "echo",
+  description: "Echo input text",
+  input: z.object({
+    text: z.string().min(1, "Please provide some text."),
+  }),
+  handler: async ({ input }) => {
+    return {
+      output: {
+        text: input.text,
+      },
+    };
+  },
+});`,
+      postSetup: ``,
+      exports: `export { app };`,
+    },
+  },
   'tanstack-ui': {
     id: 'tanstack-ui',
     displayName: 'TanStack Start (UI)',

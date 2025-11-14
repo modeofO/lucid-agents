@@ -83,6 +83,7 @@ When you select an adapter, the CLI copies the corresponding runtime framework f
 **Available Adapters:**
 
 - `hono` - Traditional HTTP server with Hono framework
+- `express` - Node-style HTTP server built on Express with `@lucid-agents/agent-kit-express`
 - `tanstack-ui` - TanStack Start with full UI dashboard (wallet integration, entrypoint testing, schema forms)
 - `tanstack-headless` - TanStack Start API-only (no UI components)
 - `next` – Next.js App Router shell with x402-next middleware and the dashboard UI
@@ -96,7 +97,7 @@ bunx @lucid-agents/cli <app-name> [options]
 
 Options:
   -t, --template <id>   Select template (blank, axllm, axllm-flow, identity)
-  -a, --adapter <id>    Select runtime adapter (hono, tanstack-ui, tanstack-headless)
+  -a, --adapter <id>    Select runtime adapter (hono, express, tanstack-ui, tanstack-headless, next)
   -i, --install         Run bun install after scaffolding
   --no-install          Skip bun install (default)
   --wizard=no           Skip wizard, use template defaults
@@ -123,6 +124,9 @@ bunx @lucid-agents/cli@latest my-agent --network=base
 
 # Identity template with Solana payments
 bunx @lucid-agents/cli@latest my-agent --template=identity --network=solana
+
+# With Express adapter
+bunx @lucid-agents/cli@latest my-agent --adapter=express --template=blank
 
 # With Hono adapter
 bunx @lucid-agents/cli@latest my-agent --adapter=hono --template=blank

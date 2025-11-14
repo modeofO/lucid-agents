@@ -25,6 +25,13 @@ import { createAgentApp } from '@lucid-agents/hono';
 import type { EntrypointDef, AgentMeta } from '@lucid-agents/core';
 ```
 
+**Express Adapter:**
+
+```ts
+import { createAgentApp } from '@lucid-agents/express';
+import type { EntrypointDef, AgentMeta } from '@lucid-agents/core';
+```
+
 **TanStack Adapter:**
 
 ```ts
@@ -55,7 +62,7 @@ The runtime manages:
 
 The return value exposes:
 
-- `app` — the underlying Hono instance you can serve with Bun, Cloudflare Workers, etc.
+- `app` — the underlying server instance (Hono or Express) you can serve with Bun/Node platforms.
 - `addEntrypoint(def)` — register more entrypoints at runtime.
 - `config` — the resolved `ResolvedAgentKitConfig` after env and runtime overrides.
 - `payments` — the active `PaymentsConfig` (if paywalling is enabled) or `undefined`.
@@ -85,6 +92,33 @@ addEntrypoint({
 });
 
 export default app;
+```
+
+**Example with Express Adapter:**
+
+```ts
+import { z } from 'zod';
+import { createAgentApp } from '@lucid-agents/express';
+
+const { app, addEntrypoint } = createAgentApp({
+  name: 'hello-agent',
+  version: '0.1.0',
+  description: 'Echoes whatever you pass in',
+});
+
+addEntrypoint({
+  key: 'echo',
+  description: 'Echo a message',
+  input: z.object({ text: z.string() }),
+  async handler({ input }) {
+    return {
+      output: { text: String(input.text ?? '') },
+      usage: { total_tokens: String(input.text ?? '').length },
+    };
+  },
+});
+
+app.listen(process.env.PORT ?? 3000);
 ```
 
 **Example with TanStack Adapter:**

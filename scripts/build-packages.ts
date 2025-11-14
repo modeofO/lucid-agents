@@ -73,6 +73,7 @@ async function buildPackages() {
     "@lucid-agents/payments",
     "@lucid-agents/core",
     "@lucid-agents/hono",
+    "@lucid-agents/express",
     "@lucid-agents/tanstack",
     "@lucid-agents/cli",
   ];
