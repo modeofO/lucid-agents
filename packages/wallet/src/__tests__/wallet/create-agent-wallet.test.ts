@@ -1,10 +1,14 @@
-import { describe, expect, it, mock } from "bun:test";
+import { afterEach, describe, expect, it, mock } from "bun:test";
 
 import { LocalEoaWalletConnector } from "../../local-eoa-connector.js";
 import { ServerOrchestratorWalletConnector } from "../../server-orchestrator-connector.js";
 import { createAgentWallet } from "../../create-agent-wallet.js";
 
 describe("createAgentWallet", () => {
+  afterEach(() => {
+    mock.restore();
+  });
+
   it("builds a local wallet from a private key", async () => {
     const handle = createAgentWallet({
       type: "local",
@@ -16,6 +20,7 @@ describe("createAgentWallet", () => {
     expect(handle.connector).toBeInstanceOf(LocalEoaWalletConnector);
 
     const address = await handle.connector.getAddress?.();
+    expect(address).toBeTruthy();
     expect(address).toMatch(/^0x[a-f0-9]{40}$/i);
   });
 

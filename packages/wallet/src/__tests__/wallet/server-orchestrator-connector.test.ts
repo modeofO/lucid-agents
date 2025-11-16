@@ -1,4 +1,4 @@
-import { describe, expect, it, mock } from "bun:test";
+import { afterEach, describe, expect, it, mock } from "bun:test";
 
 import type { AgentChallengeResponse } from "../../types.js";
 
@@ -17,6 +17,10 @@ const baseChallenge: AgentChallengeResponse["challenge"] = {
 };
 
 describe("ServerOrchestratorWalletConnector", () => {
+  afterEach(() => {
+    mock.restore();
+  });
+
   it("delegates signing to the orchestrator endpoint", async () => {
     const fetch = mock(async (_input: RequestInfo | URL, init?: RequestInit) => {
       const body = init?.body ? JSON.parse(init.body as string) : {};

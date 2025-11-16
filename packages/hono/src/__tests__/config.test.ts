@@ -44,7 +44,7 @@ describe('AgentKit config management', () => {
 
     // Global config is not affected (preventing leakage)
     const globalConfig = getAgentKitConfig();
-    expect(globalConfig.payments.facilitatorUrl).not.toBe(
+    expect(globalConfig.payments?.facilitatorUrl).not.toBe(
       'https://facilitator.test'
     );
 
