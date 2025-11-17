@@ -1,13 +1,16 @@
-import { privateKeyToAccount } from "viem/accounts";
+import { privateKeyToAccount } from 'viem/accounts';
 
-import type { LocalEoaSigner, TypedDataPayload } from '@lucid-agents/types/wallets';
+import type {
+  LocalEoaSigner,
+  TypedDataPayload,
+} from '@lucid-agents/types/wallets';
 
 const normalizePrivateKey = (key: string): `0x${string}` => {
   const trimmed = key.trim();
   if (!trimmed) {
-    throw new Error("privateKey must be a non-empty string");
+    throw new Error('privateKey must be a non-empty string');
   }
-  return (trimmed.startsWith("0x") ? trimmed : `0x${trimmed}`) as `0x${string}`;
+  return (trimmed.startsWith('0x') ? trimmed : `0x${trimmed}`) as `0x${string}`;
 };
 
 export const createPrivateKeySigner = (privateKey: string): LocalEoaSigner => {
@@ -16,10 +19,12 @@ export const createPrivateKeySigner = (privateKey: string): LocalEoaSigner => {
   return {
     async signMessage(message) {
       const payload =
-        typeof message === "string"
+        typeof message === 'string'
           ? { message }
           : { message: { raw: message } };
-      return account.signMessage(payload as never);
+      return account.signMessage(
+        payload as Parameters<typeof account.signMessage>[0]
+      );
     },
     async signTypedData(payload: TypedDataPayload) {
       return account.signTypedData({
@@ -34,4 +39,3 @@ export const createPrivateKeySigner = (privateKey: string): LocalEoaSigner => {
     },
   };
 };
-
