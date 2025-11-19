@@ -1,11 +1,11 @@
 import { Buffer } from 'node:buffer';
 import { randomUUID } from 'node:crypto';
 
+import type { AP2Config } from '@lucid-agents/types/ap2';
 import type {
   AgentKitConfig,
   AgentMeta,
   AgentRuntime,
-  AP2Config,
 } from '@lucid-agents/types/core';
 import type { TrustConfig } from '@lucid-agents/types/identity';
 import type { PaymentsConfig } from '@lucid-agents/types/payments';
@@ -226,6 +226,7 @@ export function createAgentHttpRuntime(
           signal: req.signal,
           headers: req.headers,
           runId,
+          runtime,
         });
         return jsonResponse({
           run_id: runId,
@@ -336,6 +337,7 @@ export function createAgentHttpRuntime(
               input,
               emit,
               {
+                runtime,
                 signal: req.signal,
                 headers: req.headers,
                 runId,
