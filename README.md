@@ -15,31 +15,23 @@
 
 ## What is Lucid Agents?
 
-Lucid Agents is a TypeScript-first framework for building production-ready AI agents with:
+Lucid Agents is a TypeScript-first framework for building and monetizing AI agents—an agentic commerce and payments SDK. Build AI agents that sell services, facilitate monetary transactions, and participate in agent-to-agent marketplaces.
 
-- **Multi-runtime support**: Deploy the same agent logic across Hono, TanStack Start, Express, or Next.js
-- **Built-in monetization**: x402 payment protocol with support for Ethereum (EVM) and Solana networks
-- **On-chain identity**: ERC-8004 integration for agent reputation, validation, and trust
-- **Type-safe APIs**: Zod-powered schemas with automatic manifest generation
-- **Developer experience**: CLI scaffolding, hot reload, and comprehensive examples
+**Core Capabilities:**
 
-Whether you're building a simple chatbot, a complex multi-agent system, or a marketplace of paid AI services, Lucid Agents provides the infrastructure you need.
-
----
-
-## Key Features
-
-- **Multi-Adapter Architecture**: Write your agent logic once, deploy on Hono, TanStack Start, Express, or Next.js
-- **A2A Protocol Support**: Agent-to-agent communication with task-based operations, multi-turn conversations, and agent composition
 - **x402 Payment Protocol**: Accept payments in USDC on Ethereum L2s (Base) or Solana with automatic paywall middleware
-- **ERC-8004 Identity Layer**: Register agent identities on-chain, build reputation, and prove ownership
+- **A2A Protocol Support**: Agent-to-agent communication with task-based operations, enabling agents to buy and sell services from each other
+- **ERC-8004 Identity Layer**: Register agent identities on-chain, build reputation, and prove ownership for trust in agent marketplaces
+- **Multi-Adapter Architecture**: Write your agent logic once, deploy on Hono, TanStack Start, Express, or Next.js
 - **Type-Safe Entrypoints**: Define inputs/outputs with Zod schemas, get automatic validation and JSON schemas
 - **Streaming Support**: Server-Sent Events (SSE) for real-time agent responses
 - **Task Management**: Long-running tasks with status tracking, cancellation, and SSE subscriptions
 - **AgentCard Manifests**: Auto-generated A2A-compatible manifests with Open Graph tags for discoverability
 - **Template System**: Scaffold new agents with `blank`, `axllm`, `axllm-flow`, `identity`, `trading-data-agent`, or `trading-recommendation-agent` templates
 - **Multi-Network Support**: EVM (Base, Ethereum, Sepolia) and Solana (mainnet, devnet) payment networks
-- **Production-Ready**: Built with TypeScript strict mode, ESM modules, and comprehensive testing
+- **Developer Experience**: CLI scaffolding, hot reload, comprehensive examples, TypeScript strict mode, and ESM modules
+
+Whether you're building paid AI services, agent marketplaces, or multi-agent systems where agents transact with each other, Lucid Agents provides the payments and commerce infrastructure you need.
 
 ---
 
