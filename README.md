@@ -17,7 +17,7 @@
 
 Lucid Agents is a TypeScript-first framework for building production-ready AI agents with:
 
-- **Multi-runtime support**: Deploy the same agent logic across Hono, TanStack Start, or Next.js
+- **Multi-runtime support**: Deploy the same agent logic across Hono, TanStack Start, Express, or Next.js
 - **Built-in monetization**: x402 payment protocol with support for Ethereum (EVM) and Solana networks
 - **On-chain identity**: ERC-8004 integration for agent reputation, validation, and trust
 - **Type-safe APIs**: Zod-powered schemas with automatic manifest generation
@@ -29,13 +29,15 @@ Whether you're building a simple chatbot, a complex multi-agent system, or a mar
 
 ## Key Features
 
-- **Multi-Adapter Architecture**: Write your agent logic once, deploy on Hono, TanStack Start, or Next.js
+- **Multi-Adapter Architecture**: Write your agent logic once, deploy on Hono, TanStack Start, Express, or Next.js
+- **A2A Protocol Support**: Agent-to-agent communication with task-based operations, multi-turn conversations, and agent composition
 - **x402 Payment Protocol**: Accept payments in USDC on Ethereum L2s (Base) or Solana with automatic paywall middleware
 - **ERC-8004 Identity Layer**: Register agent identities on-chain, build reputation, and prove ownership
 - **Type-Safe Entrypoints**: Define inputs/outputs with Zod schemas, get automatic validation and JSON schemas
 - **Streaming Support**: Server-Sent Events (SSE) for real-time agent responses
+- **Task Management**: Long-running tasks with status tracking, cancellation, and SSE subscriptions
 - **AgentCard Manifests**: Auto-generated A2A-compatible manifests with Open Graph tags for discoverability
-- **Template System**: Scaffold new agents with `blank`, `axllm`, `axllm-flow`, or `identity` templates
+- **Template System**: Scaffold new agents with `blank`, `axllm`, `axllm-flow`, `identity`, `trading-data-agent`, or `trading-recommendation-agent` templates
 - **Multi-Network Support**: EVM (Base, Ethereum, Sepolia) and Solana (mainnet, devnet) payment networks
 - **Production-Ready**: Built with TypeScript strict mode, ESM modules, and comprehensive testing
 
@@ -71,8 +73,8 @@ bunx @lucid-agents/cli my-agent \
 
 The CLI will:
 
-- **Adapter selection**: `hono` (HTTP server), `tanstack-ui` (full dashboard), or `tanstack-headless` (API only)
-- **Template selection**: `blank` (minimal), `axllm` (LLM-powered), `axllm-flow` (workflows), or `identity` (on-chain identity)
+- **Adapter selection**: `hono` (HTTP server), `tanstack-ui` (full dashboard), `tanstack-headless` (API only), `express` (Node.js server), or `next` (Next.js App Router)
+- **Template selection**: `blank` (minimal), `axllm` (LLM-powered), `axllm-flow` (workflows), `identity` (on-chain identity), `trading-data-agent` (merchant), or `trading-recommendation-agent` (shopper)
 - **Configuration**: Set agent metadata, LLM keys, and optional payment details
 - **Install dependencies**: Automatically run `bun install`
 
@@ -104,39 +106,15 @@ curl -X POST http://localhost:3000/entrypoints/echo/invoke \
 
 ## Architecture Overview
 
-Lucid Agents is a TypeScript monorepo built for multi-runtime agent deployment.
+Lucid Agents is a TypeScript monorepo built for multi-runtime agent deployment with a layered architecture:
+
+- **Layer 0: Types** - Shared type definitions (`@lucid-agents/types`)
+- **Layer 1: Extensions** - Optional capabilities (identity, payments, wallet, a2a, ap2)
+- **Layer 2: Core** - Framework-agnostic agent runtime (`@lucid-agents/core`)
+- **Layer 3: Adapters** - Framework integrations (hono, tanstack, express, next)
+- **Layer 4: Developer Tools** - CLI scaffolding and templates
 
 > For detailed architecture documentation including dependency graphs, request flows, and extension system design, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
-
-### Core Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                         Your Agent                          │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │  Entrypoints (typed with Zod)                          │ │
-│  │  ├─ invoke handlers (request → response)               │ │
-│  │  └─ stream handlers (request → SSE stream)             │ │
-│  └────────────────────────────────────────────────────────┘ │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-         ┌─────────────────┼─────────────────┐
-         │                 │                 │
-    ┌────▼─────┐    ┌──────▼──────┐   ┌─────▼──────┐
-    │   Hono   │    │  TanStack   │   │  Next.js   │
-    │  Adapter │    │   Adapter   │   │  Adapter   │
-    └────┬─────┘    └──────┬──────┘   └─────┬──────┘
-         │                 │                 │
-         └─────────────────┼─────────────────┘
-                           │
-         ┌─────────────────┴─────────────────┐
-         │                                   │
-    ┌────▼──────────┐              ┌────────▼────────┐
-    │     core      │              │   payments      │
-    │  (core)       │◄─────────────┤  identity       │
-    │               │              │  (ERC-8004)     │
-    └───────────────┘              └─────────────────┘
-```
 
 ### Package Structure
 
@@ -145,8 +123,21 @@ Lucid Agents is a TypeScript monorepo built for multi-runtime agent deployment.
 ├── packages/
 │   ├── core/              # Core runtime and types
 │   │   ├── src/core/           # Agent runtime, manifest generation
-│   │   ├── src/http/           # HTTP utilities
+│   │   ├── src/http/           # HTTP utilities, task handlers
 │   │   └── src/axllm/          # LLM integration helpers
+│   │
+│   ├── a2a/              # A2A Protocol client
+│   │   ├── src/client.ts       # Agent-to-agent client (invoke, stream, tasks)
+│   │   ├── src/card.ts         # Agent Card building and fetching
+│   │   └── src/runtime.ts      # A2A runtime integration
+│   │
+│   ├── ap2/              # AP2 (Agent Payments Protocol) extension
+│   │   ├── src/runtime.ts      # AP2 runtime
+│   │   └── src/manifest.ts     # Agent Card AP2 enhancement
+│   │
+│   ├── wallet/           # Wallet SDK
+│   │   ├── src/connectors/     # Wallet connectors (local, server)
+│   │   └── src/factory.ts     # Wallet factory
 │   │
 │   ├── hono/         # Hono HTTP server adapter
 │   │   ├── src/app.ts          # createAgentApp() for Hono
@@ -155,6 +146,15 @@ Lucid Agents is a TypeScript monorepo built for multi-runtime agent deployment.
 │   ├── tanstack/     # TanStack Start adapter
 │   │   ├── src/runtime.ts      # createTanStackRuntime()
 │   │   └── src/paywall.ts      # TanStack payment middleware
+│   │
+│   ├── express/       # Express adapter
+│   │   ├── src/app.ts          # createAgentApp() for Express
+│   │   └── src/paywall.ts      # Express payment middleware
+│   │
+│   ├── next/         # Next.js adapter
+│   │   ├── app/                # Next.js App Router routes
+│   │   ├── components/         # Dashboard UI components
+│   │   └── lib/                # Agent setup and utilities
 │   │
 │   ├── identity/     # ERC-8004 identity toolkit
 │   │   ├── src/init.ts         # createAgentIdentity()
@@ -167,8 +167,8 @@ Lucid Agents is a TypeScript monorepo built for multi-runtime agent deployment.
 │   │
 │   └── cli/       # CLI scaffolding tool
 │       ├── src/index.ts        # Interactive CLI
-│       ├── adapters/           # Runtime frameworks (hono, tanstack, next)
-│       └── templates/          # Project templates (blank, axllm, identity)
+│       ├── adapters/           # Runtime frameworks (hono, tanstack, express, next)
+│       └── templates/          # Project templates (blank, axllm, identity, trading-*)
 ```
 
 ### Key Concepts
@@ -181,11 +181,19 @@ Lucid Agents is a TypeScript monorepo built for multi-runtime agent deployment.
 
 **Adapters**: Runtime frameworks that expose your entrypoints as HTTP routes. Choose based on your deployment needs:
 
-- `hono` - Lightweight, edge-compatible
-- `tanstack` - Full-stack React with UI dashboard
+- `hono` - Lightweight, edge-compatible HTTP server
+- `tanstack` - Full-stack React with UI dashboard (or headless API-only)
+- `express` - Traditional Node.js HTTP server
 - `next` - Next.js App Router integration
 
-**Manifests**: Auto-generated AgentCard (`.well-known/agent.json`) that describes your agent's capabilities, pricing, and identity for discovery tools and A2A protocols.
+**A2A Communication**: Agent-to-agent communication protocol enabling agents to call other agents:
+
+- **Direct Invocation**: Synchronous calls via `client.invoke()` or `client.stream()`
+- **Task-Based Operations**: Long-running tasks with `sendMessage()`, status tracking, and cancellation
+- **Multi-Turn Conversations**: Group related tasks with `contextId` for conversational agents
+- **Agent Composition**: Agents can act as both clients and servers, enabling complex supply chains
+
+**Manifests**: Auto-generated AgentCard (`.well-known/agent-card.json`) that describes your agent's capabilities, pricing, and identity for discovery tools and A2A protocols. Built using immutable composition pattern.
 
 **Payment Networks**: Accept payments on:
 
@@ -277,6 +285,55 @@ const payments = paymentsFromEnv();
 // Auto-detects EVM vs Solana from PAYMENTS_RECEIVABLE_ADDRESS format
 ```
 
+#### [`@lucid-agents/a2a`](packages/a2a/README.md)
+
+A2A Protocol client for agent-to-agent communication.
+
+```typescript
+import { fetchAndInvoke, sendMessage, waitForTask } from '@lucid-agents/a2a';
+
+// Direct invocation
+const result = await fetchAndInvoke('https://other-agent.com', 'skillId', {
+  input: 'data',
+});
+
+// Task-based operations
+const { taskId } = await sendMessage(
+  card,
+  'skillId',
+  { input: 'data' },
+  undefined,
+  {
+    contextId: 'conversation-123',
+  }
+);
+const task = await waitForTask(client, card, taskId);
+```
+
+#### [`@lucid-agents/ap2`](packages/ap2/README.md)
+
+AP2 (Agent Payments Protocol) extension for Agent Cards.
+
+```typescript
+import { createAP2Runtime, createAgentCardWithAP2 } from '@lucid-agents/ap2';
+
+const ap2Runtime = createAP2Runtime({ roles: ['merchant'] });
+const cardWithAP2 = createAgentCardWithAP2(baseCard, ap2Runtime.config);
+```
+
+#### [`@lucid-agents/wallet`](packages/wallet/README.md)
+
+Wallet SDK for agent and developer wallet management.
+
+```typescript
+import { createAgentWallet } from '@lucid-agents/wallet';
+
+const wallet = await createAgentWallet({
+  type: 'local',
+  privateKey: process.env.AGENT_WALLET_PRIVATE_KEY,
+});
+```
+
 ### CLI Tool
 
 #### [`@lucid-agents/cli`](packages/cli/README.md)
@@ -305,10 +362,7 @@ Here's a complete example showing identity, payments, and LLM integration:
 ```typescript
 import { z } from 'zod';
 import { createAgentApp } from '@lucid-agents/hono';
-import {
-  createAgentIdentity,
-  getTrustConfig,
-} from '@lucid-agents/identity';
+import { createAgentIdentity, getTrustConfig } from '@lucid-agents/identity';
 import { AI } from '@ax-llm/ax';
 
 // 1. Create on-chain identity
