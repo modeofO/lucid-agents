@@ -27,7 +27,7 @@ export type IdentityRegistryClientOptions<
   WalletClient extends WalletClientLike | undefined = undefined,
 > = {
   address: Hex;
-  chainId?: number;
+  chainId: number;
   publicClient: PublicClient;
   walletClient?: WalletClient;
   namespace?: string;
@@ -129,7 +129,7 @@ function createTrustConfig(
 
 export type IdentityRegistryClient = {
   readonly address: Hex;
-  readonly chainId: number | null;
+  readonly chainId: number;
 
   get(agentId: bigint | number | string): Promise<IdentityRecord | null>;
   getMetadata(
@@ -349,11 +349,6 @@ export function createIdentityRegistryClient<
     record: IdentityRecord,
     signature?: string
   ): RegistrationEntry {
-    if (chainId == null) {
-      throw new Error(
-        'identity registry client needs chainId to build CAIP-10 registration entries'
-      );
-    }
     return createRegistrationEntry({
       agentId: record.agentId,
       address: record.owner,

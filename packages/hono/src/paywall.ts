@@ -35,9 +35,9 @@ export function withPayments({
   const network = entrypoint.network ?? payments.network;
   const price = resolvePrice(entrypoint, payments, kind);
 
-  validatePaymentsConfig(payments, network, entrypoint.key);
-
   if (!price) return false;
+
+  validatePaymentsConfig(payments, network, entrypoint.key);
   if (!payments.payTo) return false;
   const requestSchema = toJsonSchemaOrUndefined(entrypoint.input);
   const responseSchema = toJsonSchemaOrUndefined(entrypoint.output);
