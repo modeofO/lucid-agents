@@ -41,7 +41,7 @@ import { createAgentApp } from "@lucid-agents/hono";`,
   description: process.env.AGENT_DESCRIPTION,
 });
 
-const runtime = appBuilder.build();
+const runtime = await appBuilder.build();
 const { app, addEntrypoint } = createAgentApp(runtime);`,
       entrypointRegistration: `addEntrypoint({
   key: "echo",
@@ -76,7 +76,7 @@ import { createAgentApp } from "@lucid-agents/express";`,
   description: process.env.AGENT_DESCRIPTION,
 });
 
-const runtime = appBuilder.build();
+const runtime = await appBuilder.build();
 const { app, addEntrypoint } = createAgentApp(runtime);`,
       entrypointRegistration: `addEntrypoint({
   key: "echo",
@@ -111,8 +111,8 @@ import { createTanStackRuntime } from "@lucid-agents/tanstack";`,
   description: process.env.AGENT_DESCRIPTION,
 });
 
-const runtime = appBuilder.build();
-const tanstack = createTanStackRuntime(runtime);
+const runtime = await appBuilder.build();
+const tanstack = await createTanStackRuntime(runtime);
 
 const { handlers } = tanstack;`,
       entrypointRegistration: `runtime.entrypoints.add({
@@ -150,8 +150,8 @@ import { createTanStackRuntime } from "@lucid-agents/tanstack";`,
   description: process.env.AGENT_DESCRIPTION,
 });
 
-const runtime = appBuilder.build();
-const tanstack = createTanStackRuntime(runtime);
+const runtime = await appBuilder.build();
+const tanstack = await createTanStackRuntime(runtime);
 
 const { handlers } = tanstack;`,
       entrypointRegistration: `runtime.entrypoints.add({

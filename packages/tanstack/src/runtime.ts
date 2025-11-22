@@ -70,13 +70,13 @@ export function createTanStackHandlers(
   };
 }
 
-export function createTanStackRuntime(
+export async function createTanStackRuntime(
   runtimeOrBuilder: AgentRuntime | AppBuilder
-): TanStackRuntime {
+): Promise<TanStackRuntime> {
   // Build runtime if builder is provided
   const runtime: AgentRuntime =
     runtimeOrBuilder instanceof AppBuilder
-      ? runtimeOrBuilder.build()
+      ? await runtimeOrBuilder.build()
       : runtimeOrBuilder;
 
   return {

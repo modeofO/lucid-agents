@@ -486,8 +486,9 @@ export interface Extension<R extends Record<string, unknown> = {}> {
   /**
    * Optional hook called after all extensions are built.
    * Useful for final setup that requires the complete runtime.
+   * Can be async for initialization that requires async operations.
    */
-  onBuild?: (runtime: AgentRuntime) => void;
+  onBuild?: (runtime: AgentRuntime) => void | Promise<void>;
 
   /**
    * Optional hook called when building the manifest/agent card.

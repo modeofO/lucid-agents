@@ -33,19 +33,19 @@ export type CreateAgentAppOptions = {
   afterMount?: (app: Express) => void;
 };
 
-export function createAgentApp(
+export async function createAgentApp(
   runtimeOrBuilder: AgentRuntime | AppBuilder,
   opts?: CreateAgentAppOptions
-): CreateAgentAppReturn<
+): Promise<CreateAgentAppReturn<
   Express,
   AgentRuntime,
   AgentRuntime['agent'],
   AgentRuntime['config']
-> {
+>> {
   // Build runtime if builder is provided
   const runtime: AgentRuntime =
     runtimeOrBuilder instanceof AppBuilder
-      ? runtimeOrBuilder.build()
+      ? await runtimeOrBuilder.build()
       : runtimeOrBuilder;
 
   // Require HTTP extension - runtime must have handlers

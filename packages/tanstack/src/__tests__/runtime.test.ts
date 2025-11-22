@@ -11,7 +11,7 @@ const meta = {
 
 describe("createTanStackRuntime", () => {
   it("exposes tanstack handlers alongside the core runtime", async () => {
-    const runtime = createApp(meta)
+    const runtime = await createApp(meta)
       .use(http())
       .build();
     runtime.entrypoints.add({
@@ -20,7 +20,7 @@ describe("createTanStackRuntime", () => {
         output: input ?? {},
       }),
     });
-    const { runtime: tanstackRuntime, handlers } = createTanStackRuntime(runtime);
+    const { runtime: tanstackRuntime, handlers } = await createTanStackRuntime(runtime);
 
     expect(typeof tanstackRuntime.entrypoints.add).toBe("function");
     expect(typeof handlers.invoke).toBe("function");

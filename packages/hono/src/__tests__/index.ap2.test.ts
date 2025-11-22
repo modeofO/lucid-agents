@@ -18,13 +18,13 @@ describe('createAgentApp AP2 extension', () => {
   };
 
   it('emits AP2 extension when explicit config provided', async () => {
-    const runtime = createApp(meta)
+    const runtime = await createApp(meta)
       .use(http())
       .use(
         ap2({ roles: ['shopper'], description: 'Supports AP2 shopper role' })
       )
       .build();
-    const { app } = createAgentApp(runtime);
+    const { app } = await createAgentApp(runtime);
     const card = await fetchCard(app);
     const extensions = card.capabilities?.extensions;
     expect(Array.isArray(extensions)).toBe(true);
@@ -39,7 +39,7 @@ describe('createAgentApp AP2 extension', () => {
 
   it('requires explicit AP2 configuration - does not auto-detect payments', async () => {
     const { payments } = await import('@lucid-agents/payments');
-    const runtime = createApp(meta)
+    const runtime = await createApp(meta)
       .use(http())
       .use(
         payments({
@@ -53,7 +53,7 @@ describe('createAgentApp AP2 extension', () => {
       )
       // AP2 not explicitly added - should not appear in manifest
       .build();
-    const { app } = createAgentApp(runtime);
+    const { app } = await createAgentApp(runtime);
     const card = await fetchCard(app);
     const extensions = card.capabilities?.extensions;
     // AP2 extension should not be present without explicit configuration
@@ -69,11 +69,11 @@ describe('createAgentApp AP2 extension', () => {
   });
 
   it('respects explicit required flag override', async () => {
-    const runtime = createApp(meta)
+    const runtime = await createApp(meta)
       .use(http())
       .use(ap2({ roles: ['merchant', 'shopper'], required: false }))
       .build();
-    const { app } = createAgentApp(runtime);
+    const { app } = await createAgentApp(runtime);
     const card = await fetchCard(app);
     const extensions = card.capabilities?.extensions;
     const ap2Extension = extensions.find(

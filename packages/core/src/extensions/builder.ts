@@ -29,7 +29,7 @@ export class AppBuilder {
     return this;
   }
 
-  build(config?: AgentKitConfig): AgentRuntime {
+  async build(config?: AgentKitConfig): Promise<AgentRuntime> {
     setActiveInstanceConfig(config);
     const resolvedConfig = getAgentKitConfig(config);
 
@@ -186,10 +186,24 @@ export class AppBuilder {
     }
 
     // Call onBuild hooks after runtime is fully constructed
+    // These can be async for initialization that requires async operations
+    const onBuildPromises: Promise<void>[] = [];
     for (const ext of this.extensions) {
       if (ext.onBuild) {
         try {
-          ext.onBuild(runtime);
+          const result = ext.onBuild(runtime);
+          if (result instanceof Promise) {
+            onBuildPromises.push(
+              result.catch(error => {
+                const errorMessage =
+                  error instanceof Error ? error.message : String(error);
+                throw new Error(
+                  `Extension "${ext.name}" hook onBuild failed: ${errorMessage}`,
+                  { cause: error }
+                );
+              })
+            );
+          }
         } catch (error) {
           const errorMessage =
             error instanceof Error ? error.message : String(error);
@@ -199,6 +213,11 @@ export class AppBuilder {
           );
         }
       }
+    }
+
+    // Wait for all async onBuild hooks to complete
+    if (onBuildPromises.length > 0) {
+      await Promise.all(onBuildPromises);
     }
 
     return runtime;

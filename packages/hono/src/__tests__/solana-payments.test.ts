@@ -13,8 +13,8 @@ describe('Hono Solana Payments', () => {
     network: 'solana-devnet',
   };
 
-  it('creates agent with Solana network configuration', () => {
-    const runtime = createApp({
+  it('creates agent with Solana network configuration', async () => {
+    const runtime = await createApp({
       name: 'solana-agent',
       version: '1.0.0',
       description: 'Agent accepting Solana payments',
@@ -22,7 +22,7 @@ describe('Hono Solana Payments', () => {
       .use(http())
       .use(payments({ config: solanaPayments }))
       .build();
-    const { app, addEntrypoint } = createAgentApp(runtime);
+    const { app, addEntrypoint } = await createAgentApp(runtime);
 
     addEntrypoint({
       key: 'echo',
@@ -46,14 +46,14 @@ describe('Hono Solana Payments', () => {
     // which handles payment verification. The middleware is an external package
     // that should support solana-devnet and solana networks.
 
-    const runtime = createApp({
+    const runtime = await createApp({
       name: 'solana-agent',
       version: '1.0.0',
     })
       .use(http())
       .use(payments({ config: solanaPayments }))
       .build();
-    const { app, addEntrypoint } = createAgentApp(runtime);
+    const { app, addEntrypoint } = await createAgentApp(runtime);
 
     addEntrypoint({
       key: 'paid-task',
@@ -70,31 +70,31 @@ describe('Hono Solana Payments', () => {
     expect(app).toBeDefined();
   });
 
-  it('accepts Solana Base58 address format', () => {
+  it('accepts Solana Base58 address format', async () => {
     const validSolanaAddresses = [
       '9yPGxVrYi7C5JLMGjEZhK8qQ4tn7SzMWwQHvz3vGJCKz',
       'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
       'Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr',
     ];
 
-    validSolanaAddresses.forEach(address => {
+    for (const address of validSolanaAddresses) {
       const config: PaymentsConfig = {
         payTo: address,
         facilitatorUrl: 'https://facilitator.test',
         network: 'solana',
       };
 
-      const runtime = createApp({ name: 'test', version: '1.0.0' })
+      const runtime = await createApp({ name: 'test', version: '1.0.0' })
         .use(http())
         .use(payments({ config }))
         .build();
-      const { app } = createAgentApp(runtime);
+      const { app } = await createAgentApp(runtime);
 
       expect(app).toBeDefined();
-    });
+    }
   });
 
-  it('accepts both Solana mainnet and devnet configurations', () => {
+  it('accepts both Solana mainnet and devnet configurations', async () => {
     // Note: Testing actual payment flow requires mocking x402-hono middleware.
     // This test verifies that Solana network configs are accepted by the app.
 
@@ -104,7 +104,7 @@ describe('Hono Solana Payments', () => {
     ] as const;
 
     for (const { value: network, name } of networks) {
-      const runtime = createApp({ name: 'test', version: '1.0.0' })
+      const runtime = await createApp({ name: 'test', version: '1.0.0' })
         .use(http())
         .use(
           payments({
@@ -115,7 +115,7 @@ describe('Hono Solana Payments', () => {
           })
         )
         .build();
-      const { app, addEntrypoint } = createAgentApp(runtime);
+      const { app, addEntrypoint } = await createAgentApp(runtime);
 
       addEntrypoint({
         key: 'test',
@@ -129,7 +129,7 @@ describe('Hono Solana Payments', () => {
   });
 
   it('includes manifest with Solana payment metadata', async () => {
-    const runtime = createApp({
+    const runtime = await createApp({
       name: 'solana-agent',
       version: '1.0.0',
       description: 'Solana payment agent',
@@ -137,7 +137,7 @@ describe('Hono Solana Payments', () => {
       .use(http())
       .use(payments({ config: solanaPayments }))
       .build();
-    const { app } = createAgentApp(runtime);
+    const { app } = await createAgentApp(runtime);
 
     const request = new Request('http://localhost/.well-known/agent.json', {
       method: 'GET',
@@ -157,18 +157,18 @@ describe('Hono Solana Payments', () => {
     expect(payment.payee).toBe('9yPGxVrYi7C5JLMGjEZhK8qQ4tn7SzMWwQHvz3vGJCKz');
   });
 
-  it('rejects unsupported network at configuration time', () => {
+  it('rejects unsupported network at configuration time', async () => {
     const invalidPayments = {
       payTo: '9yPGxVrYi7C5JLMGjEZhK8qQ4tn7SzMWwQHvz3vGJCKz',
       facilitatorUrl: 'https://facilitator.test' as const,
       network: 'solana-mainnet' as any, // Invalid - should be 'solana'
     };
 
-    const runtime = createApp({ name: 'test', version: '1.0.0' })
+    const runtime = await createApp({ name: 'test', version: '1.0.0' })
       .use(http())
       .use(payments({ config: invalidPayments }))
       .build();
-    const { addEntrypoint } = createAgentApp(runtime);
+    const { addEntrypoint } = await createAgentApp(runtime);
 
     // Should throw when adding entrypoint (validation happens during paywall setup)
     expect(() => {

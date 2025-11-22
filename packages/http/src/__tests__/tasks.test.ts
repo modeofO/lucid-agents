@@ -43,7 +43,7 @@ const makeMockRuntime = (
       input,
       signal: options.signal,
       metadata: {
-        headers: options.headers || new Headers(),
+      headers: options.headers || new Headers(),
       },
       runId: options.runId,
       runtime: options.runtime,

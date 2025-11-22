@@ -258,7 +258,7 @@ async function main() {
   console.log('STEP 3: Creating Agent 3 (Client Agent)');
   console.log('-'.repeat(80));
 
-  const runtime3 = createApp({
+  const runtime3 = await createApp({
     name: 'client-agent',
     version: '1.0.0',
     description: 'Client agent that calls facilitator agent',

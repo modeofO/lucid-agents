@@ -2,19 +2,14 @@
 import { http } from "@lucid-agents/http";
 import { wallets } from "@lucid-agents/wallet";
 import { walletsFromEnv } from "@lucid-agents/wallet";
-import { identity } from "@lucid-agents/identity";
+import { identity, identityFromEnv } from "@lucid-agents/identity";
 import { createAgentIdentity, getTrustConfig } from "@lucid-agents/identity";
 
 {{ADAPTER_PRE_SETUP}}
 // Add extensions for HTTP, wallets, and identity
 appBuilder.use(http());
 appBuilder.use(wallets({ config: { wallets: walletsFromEnv() } }));
-appBuilder.use(identity({
-  domain: process.env.AGENT_DOMAIN,
-  autoRegister: process.env.REGISTER_IDENTITY === "true",
-  rpcUrl: process.env.RPC_URL,
-  chainId: process.env.CHAIN_ID ? parseInt(process.env.CHAIN_ID) : undefined,
-}));
+appBuilder.use(identity({ config: identityFromEnv() }));
 
 {{ADAPTER_POST_SETUP}}
 // Identity feature setup

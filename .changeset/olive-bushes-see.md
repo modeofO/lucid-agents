@@ -25,27 +25,44 @@ Refactor to protocol-agnostic extension-based architecture with HTTP as separate
 - **Removed utilities**: Removed `toJsonSchemaOrUndefined()` - inline `z.toJSONSchema()` directly where needed
 - **Removed types**: Removed `InvokeContext`, `StreamContext`, and `InvokeResult` from `@lucid-agents/core` - these are HTTP-specific and now in `@lucid-agents/http`
 - **All adapters**: Now use `createApp().use(http()).build()` pattern and require HTTP extension
+- **Identity package**: `createAgentIdentity()` now requires `runtime: AgentRuntime` parameter (breaking change) - must have `runtime.wallets.agent` configured
 
 **New API:**
 
 ```typescript
 import { createApp } from '@lucid-agents/core';
 import { http } from '@lucid-agents/http';
-import { identity } from '@lucid-agents/identity';
+import { identity, identityFromEnv } from '@lucid-agents/identity';
 import { payments } from '@lucid-agents/payments';
 import { a2a } from '@lucid-agents/a2a';
 
+// Option 1: Automatic identity creation via extension (recommended)
+// The identity extension's onBuild hook automatically creates identity if config is provided
 const runtime = createApp(meta)
   .use(http())
-  .use(identity({ trust }))
+  .use(wallets({ config: { wallets: walletsFromEnv() } }))
+  .use(identity({ config: identityFromEnv() })) // Auto-creates identity during build
   .use(payments({ config }))
   .use(a2a())
+  .build(); // All async onBuild hooks (including identity creation) are automatically awaited
+
+// Option 2: Manual identity creation after build
+const runtime = createApp(meta)
+  .use(http())
+  .use(wallets({ config: { wallets: walletsFromEnv() } }))
+  .use(identity()) // Extension without auto-create
   .build();
+
+const identity = await createAgentIdentity({
+  runtime, // Now requires runtime parameter
+  domain: process.env.AGENT_DOMAIN,
+  autoRegister: true,
+});
 ```
 
 **Migration Guide:**
 
-1. **Replace runtime creation:**
+1. **Replace app creation:**
    - Old: `createAgentRuntime(meta, options)`
    - New: `createApp(meta).use(extensions).build()`
 
@@ -70,4 +87,10 @@ const runtime = createApp(meta)
    - Old: `runtime.agent.invoke(key, input, ctx)`
    - New: Use HTTP handlers or `invokeHandler` from `@lucid-agents/http` for direct calls
 
-7. **Update CLI templates and examples** to use new extension API
+7. **Update identity usage:**
+   - Old: `createAgentIdentity({ domain, autoRegister })` (standalone, no runtime required)
+   - New: `createAgentIdentity({ runtime, domain, autoRegister })` (requires runtime parameter)
+   - **Recommended**: Use automatic mode with `identity({ config: identityFromEnv() })` in extension chain
+   - New helper: `identityFromEnv()` loads config from `AGENT_DOMAIN`, `RPC_URL`, `CHAIN_ID`, `REGISTER_IDENTITY` env vars
+
+8. **Update CLI templates and examples** to use new extension API

@@ -5,15 +5,15 @@ import { describe, expect, it } from 'bun:test';
 import { z } from 'zod';
 
 describe('@lucid-agents/express', () => {
-  it('creates an Express app and registers entrypoints', () => {
-    const runtime = createApp({
+  it('creates an Express app and registers entrypoints', async () => {
+    const runtime = await createApp({
       name: 'express-agent',
       version: '1.0.0',
       description: 'Test agent',
     })
       .use(http())
       .build();
-    const { app, addEntrypoint } = createAgentApp(runtime);
+    const { app, addEntrypoint } = await createAgentApp(runtime);
 
     expect(typeof app).toBe('function');
 
